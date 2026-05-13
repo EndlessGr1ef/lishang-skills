@@ -1,93 +1,185 @@
-# Thariq Shihipar 原文主张与社区讨论
+# Thariq Shihipar's Original Post and Community Discussion
 
-> 记录日期：2026-05-13
-> 原文：Thariq Shihipar (trq212) 在 X 发布的《Using Claude Code: The Unreasonable Effectiveness of HTML》
-> 链接：https://x.com/trq212/status/2011523109871108570（推文链）
+> Record date: 2026-05-13
+> Original: Thariq Shihipar (`trq212`) on X, "Using Claude Code: The Unreasonable Effectiveness of HTML"
+> Link: https://x.com/trq212/status/2052809885763747935
 
-## 五大主张（详细版）
+## Important note on scope
 
-### 1. 空间信息 > 线性文本
+This file aims to stay close to the structure and wording of Thariq's original post. It separates:
 
-Markdown 本质上是一种线性格式。代码 diff、调用图、架构对比、设计方向并排对比——这些都是**空间信息**，Markdown 把它们压成一条线。
+- **What Thariq explicitly argues in the post**
+- **What is later interpretation, synthesis, or community reaction**
 
-HTML 可以做：
-- 并排对比（grid / flexbox）
-- 复杂表格
-- 有 margin 标注的 diff
-- 框图 + 箭头
-- 可折叠区域
+## Intro framing from the post
 
-> 原文示例：PR 审查页面，diff 嵌入 inline margin 标注 + 严重性颜色编码
+Thariq starts by acknowledging why Markdown became dominant for agent output:
 
-### 2. Token 投资回报率
+- simple
+- portable
+- somewhat rich
+- easy for humans to edit
 
-同样的输出 token，HTML 能承载远比 Markdown 多的信息：
-- Markdown：纯文本 + 代码块 + 列表 + 表格
-- HTML：导航栏 + 侧边目录 + tab 页 + 折叠区 + 内联 SVG 图 + 表格 + 列表 + 代码高亮 + 交互控件
+He then argues that as agents become more powerful, Markdown increasingly feels restrictive for artifacts such as specs, reference files, brainstorming outputs, and explainers. He specifically says he finds Markdown files over roughly 100 lines difficult to read, wants richer visualizations and diagrams, and increasingly edits through Claude rather than by hand.
 
-Thariq 认为：**用 4K token 生成的 Markdown 是一面墙，用 4K token 生成的 HTML 是一个可直接发布的页面。**
+## The post's actual argument structure
 
-### 3. 浏览器原生可读
+The original post is organized around the following sections.
 
-- `.md` 文件：需要 IDE/工具渲染，不可直接浏览器打开，或打开后只有纯文本
-- `.html` 文件：任何浏览器直接打开，URL 可分享，S3/CDN 直接托管
+### 1. Information Density
 
-> 实际体会：发一个 `.md` 给同事，对方要下载 -> 打开编辑器 -> 才能看。
-> 发一个 `.html`，对方双击浏览器打开，或者上传到内网 CDN 分享链接。
+Thariq argues that HTML can convey much richer information than Markdown. He lists examples such as:
 
-### 4. Agent 构建复杂页面不费力
+- tabular data using tables
+- design data with CSS
+- illustrations with SVG
+- code snippets with script tags
+- interactions using HTML elements with JavaScript + CSS
+- workflows using SVG and HTML
+- spatial data using absolute positioning and canvases
+- images using image tags
 
-模型在 HTML/CSS/JS 上的训练数据远多于 Markdown 的 layout/template 惯例：
-- 让模型写一个带 tab 的 HTML 页面：几乎零成本
-- 让模型用 Markdown "对齐三栏"：做不到
+He goes so far as to argue that there is almost no information Claude can read that cannot be represented fairly efficiently with HTML.
 
-模型天生擅长 HTML，这是它的"母语"之一。
+He also contrasts this with Markdown workarounds such as ASCII diagrams and even Unicode-based color approximation. One of the attached images is explicitly captioned:
 
-### 5. 超长文档的可导航性
+> "Claude Code trying to show color in markdown"
 
-800 行的 Markdown 文档几乎没人能读完。但 800 行 HTML 可以通过以下方式变成可浏览的：
-- 固定侧边目录
-- `<details>/<summary>` 折叠 section
-- tab 分页（按主题拆分）
-- 返回顶部按钮
-- 引导式 "Next →" 导航
+### 2. Visual Clarity & Ease of Reading
 
-> 核心洞察：**人们不读长文档是因为没法扫读，HTML 解决了扫读问题。**
+Thariq argues that long HTML documents are much easier to read than long Markdown documents because Claude can structure them visually with:
 
-## 20 个示例分类
+- tabs
+- illustrations
+- links
+- responsive layout
 
-| # | 分类 | 示例数 | 代表 |
-|---|------|--------|------|
-| 01 | 探索与规划 | 3 | 三种代码方案并排对比、视觉设计方向、实施计划 |
-| 02 | 代码审查 | 3 | 带标注的 PR、PR 描述、模块地图 |
-| 03 | 设计 | 2 | 活的 Design System、组件变体 |
-| 04 | 原型 | 2 | 动画沙箱、可点击流程 |
-| 05 | 图示 | 2 | SVG 图形表、带注释的流程图 |
-| 06 | 演示 | 1 | 键盘导航的 HTML 幻灯片 |
-| 07 | 研究与学习 | 2 | Feature 解释、概念解释 |
-| 08 | 报告 | 2 | 周报、事故时间线 |
-| 09 | 自定义编辑器 | 3 | 工单看板、Feature Flag 编辑器、Prompt 调参器 |
+A key point here is personal and practical, not universal: he says that in practice he tends not to read Markdown files longer than about 100 lines and cannot get many others in his organization to read them either.
 
-所有示例见：https://thariqs.github.io/html-effectiveness/
+### 3. Ease of Sharing
 
-## 社区反应
+Thariq argues that HTML is easier to share because browsers render it natively. By contrast, Markdown often needs an editor, renderer, or attachment workflow.
+
+His concrete sharing model is:
+
+- generate an HTML file
+- upload it somewhere such as S3
+- share a link that colleagues can open directly
+
+He explicitly claims that the chance of someone actually reading a spec, report, or PR writeup is much higher if it is in HTML.
+
+### 4. Two-way Interaction
+
+This is one of the most important parts of the post and is easy to understate.
+
+Thariq is not only talking about prettier documents. He is also talking about **interactive artifacts** that let the user manipulate parameters and then feed those edits back into the workflow.
+
+Examples he gives or implies include:
+
+- sliders or knobs to adjust a design
+- controls to tweak algorithm options and see what happens
+- ways to copy those changes back into a prompt for Claude Code
+
+He links to a separate playgrounds post as an example of this two-way interaction.
+
+### 5. Data Ingestion
+
+This is another distinctive part of the post.
+
+Thariq asks why someone would use Claude Code for HTML generation instead of other Claude surfaces, and answers: because Claude Code can ingest so much context.
+
+He specifically mentions:
+
+- the file system
+- MCPs such as Slack and Linear
+- browser context
+- git history
+
+He gives an example from the post itself: asking Claude Code to scan his code folder, find generated HTML files, group and categorize them, and then create an HTML file with diagrams representing each type.
+
+### 6. It’s Joyful
+
+This section is short but real. Thariq says making HTML documents with Claude is simply more fun and makes him feel more involved and invested in the creation process.
+
+This is not a technical argument so much as a workflow-affect argument.
+
+## How to Get Started
+
+Thariq explicitly says people do **not** need to over-formalize this immediately.
+
+He even says he is a little afraid people will turn the post into a `/html` skill. His advice is that people can often start simply by asking for:
+
+- "make an HTML file"
+- "make an HTML artifact"
+
+His suggested starting point is to learn what you want the artifact to do, prompt from scratch for a while, and only later formalize reusable patterns if needed.
+
+## Use-case structure in the post
+
+Thariq groups his examples into these buckets:
+
+| # | Category | Examples |
+|---|---|---|
+| 01 | Exploration & Planning | explorations of options, visual design directions, implementation plans |
+| 02 | Code Review & Understanding | annotated PRs, PR explanations, code understanding |
+| 03 | Design | design systems, component variants |
+| 04 | Prototyping | animation sandboxes, clickable flows |
+| 05 | Illustrations & Diagrams | SVG figure sheets, annotated flowcharts |
+| 06 | Decks | HTML slide decks |
+| 07 | Research & Learning | feature explainers, concept explainers |
+| 08 | Reports | weekly status, incident timelines |
+| 09 | Custom Editing Interfaces | triage boards, feature-flag editors, prompt tuners |
+
+All examples are available at: https://thariqs.github.io/html-effectiveness/
+
+## FAQ tradeoffs from the original post
+
+The FAQ matters because it tempers the enthusiasm of the rest of the post.
+
+### Isn't HTML less token efficient?
+
+Thariq acknowledges that Markdown often uses fewer tokens, but argues that HTML's added expressiveness and higher likelihood of being read make the tradeoff worthwhile for him.
+
+### When do you still use Markdown?
+
+He says he has honestly stopped using Markdown for almost everything and describes himself, implicitly, as being far on the HTML-maximalist side.
+
+This is important because many downstream summaries are more moderate than the original stance.
+
+### Does HTML take longer to generate?
+
+Yes. Thariq explicitly says HTML does take longer, estimating roughly **2-4x longer than Markdown**, but says he finds the results worth it.
+
+### What about version control?
+
+He calls this one of HTML's biggest downsides:
+
+- HTML diffs are noisy
+- HTML is harder to review in diff form than Markdown
+
+### How do you get good taste instead of ugly HTML?
+
+He suggests using a design-system reference file derived from the codebase so Claude has a stylistic anchor for future HTML outputs.
+
+## Community reaction
 
 ### Simon Willison
 
-在《Using Claude Code: The Unreasonable Effectiveness of HTML》链接博客中写道：
-> "I've been defaulting to asking for most things in Markdown since the GPT-4 days... Thariq's piece here has caused me to reconsider that, especially for output."
-
-他亲自测试了让 GPT-5.5 用 HTML 格式解释 `copy.fail` 的安全漏洞 PoC。
+In his link-blog post, Simon Willison highlighted the piece as a reason to reconsider defaulting to Markdown for output. He emphasized the benefits of SVG diagrams, in-page navigation, and richer HTML explanations.
 
 ### Hacker News
 
-HN 讨论超 1000 分，主要争议点：
-- **支持方**：确实，Markdown 的线性结构限制了很多输出，HTML 能承载更丰富的信息
-- **反对方**：(a) HTML 混杂了大量格式 token，降低了输出效率 (b) 可编辑性差，不能直接作为代码注释 (c) 看起来太像成品，人们不敢修改
-- **折中**：`markdown` → `html` 转换作为后处理步骤，不是替换原始输出
+The Hacker News discussion broadly split into three positions:
 
-### 通用共识
+- **Supportive**: Markdown really does flatten many outputs, while HTML can better carry spatial or highly structured information.
+- **Critical**: HTML may be less token-efficient, less editable, and too visually "finished".
+- **Compromise**: Markdown may still be useful as a working format, with HTML as a delivery format.
 
-1. HTML 更适合**给人类阅读**的终端产物（报告、方案、PR 审查）
-2. Markdown 仍然是更适合**给 AI 编辑**的工作格式
-3. 最佳实践是混合使用：Markdown 作为工作流格式，HTML 作为交付格式
+## Bottom-line interpretation
+
+A careful reading of the post suggests:
+
+1. Thariq's strongest explicit themes are **information density, readability, sharing, interactivity, context ingestion, and workflow enjoyment**.
+2. He is personally much more HTML-maximalist than many later summaries.
+3. The post is enthusiastic but not cost-free: it explicitly admits **slower generation** and **poor diff ergonomics**.
+4. Many practical team guidelines derived from the post are reasonable, but they should not be mistaken for Thariq's exact wording.

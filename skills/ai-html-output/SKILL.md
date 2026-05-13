@@ -1,6 +1,6 @@
 ---
 name: ai-html-output
-description: 用 HTML 替代 Markdown 作为 AI 输出格式 — 报告、代码审查、技术计划、研究摘要、状态更新等场景。基于 Thariq Shihipar "The Unreasonable Effectiveness of HTML" 趋势。标记了 HTML 优于 Markdown 的场景、模板骨架、配色惯例说明。
+description: Use HTML instead of Markdown as an AI output format for reports, code reviews, technical plans, research summaries, status updates, and similar deliverables. Derived from Thariq Shihipar's "The Unreasonable Effectiveness of HTML" post and examples. Includes a source-faithful summary, practical trigger scenarios, a template skeleton, and color-theme conventions.
 version: 1.0.0
 metadata:
   hermes:
@@ -12,98 +12,114 @@ platforms: [linux, macos, windows]
 
 # AI HTML Output
 
-用 HTML 替代 Markdown 作为 AI 的默认输出格式，让报告、代码审查、技术方案和知识文档可交互、可导航、一目了然。
+Use HTML instead of Markdown when AI output needs to be interactive, navigable, easy to scan, and easy to share.
 
-> **核心哲学**: HTML 不是"花哨的 Markdown"，它是信息空间布局的载体。Markdown 适合编辑，HTML 适合阅读。
+> **Core philosophy**: HTML is not just "fancy Markdown". It is a medium for laying out information in space. Markdown is often better for editing; HTML is often better for reading.
 
-## 背景
+## Background
 
-**2026年5月8日**，Anthropic Claude Code 工程负责人 **Thariq Shihipar** 在 X 上发布长文 **《Using Claude Code: The Unreasonable Effectiveness of HTML》**，主张在日常 AI 交互中用 HTML 替代 Markdown 作为输出格式。
+On **May 8, 2026**, **Thariq Shihipar**, an engineering lead on Anthropic Claude Code, published a long-form post on X titled **"Using Claude Code: The Unreasonable Effectiveness of HTML"**, arguing that HTML is often a better output format than Markdown for many AI-generated artifacts.
 
-- 首 16 小时：440万+ 曝光、8,200+ 点赞、15,700+ 书签
-- 配套演示站点：`thariqs.github.io/html-effectiveness/`（20 个 HTML 示例）
-- 引发 Hacker News（1000+ 分）、Simon Willison 博客、Threads、LinkedIn 大讨论
+- First 16 hours: 4.4M+ impressions, 8,200+ likes, 15,700+ bookmarks
+- Companion demo site: `thariqs.github.io/html-effectiveness/` with 20 HTML examples
+- Sparked major discussion on Hacker News, Simon Willison's blog, Threads, and LinkedIn
 
-### Thariq 五大主张
+## Source-faithful summary of Thariq's post
 
-| # | 主张 | 核心逻辑 |
-|---|------|---------|
-| 1 | **空间信息 > 线性文本** | Diff、调用图、架构对比是空间信息，Markdown 把它们压平了。HTML 可以并排、标注、折叠。 |
-| 2 | **Token 投资回报率** | 同样 4K 输出 token，Markdown 给一段墙，HTML 给一个带导航/图表/折叠区的结构化页面。 |
-| 3 | **浏览器原生可读** | `.md` 需要工具渲染，`.html` 在任何浏览器上直接打开。发给同事 / 上传 CDN 即读。 |
-| 4 | **Agent 构建复杂页面不费力** | 模型在 HTML/CSS/JS 上的训练数据远超 markdown layout。让它做 tab、图表、交互式列表几乎零成本。 |
-| 5 | **超长文档的可导航性** | 800 行的 .md 没人读完。HTML 可以用目录侧栏、可折叠 section、tab 分页把长文档结构化。 |
+The original post is structured around these themes:
 
-详情见 `references/thariq-original-claims.md`。
+| Theme | What Thariq argues |
+|---|---|
+| **Information Density** | HTML can express richer structures than Markdown: tables, CSS-based design, SVG, scripts, interactions, workflows, spatial layouts, and images. |
+| **Visual Clarity & Ease of Reading** | Long specs and plans are easier to navigate as HTML with tabs, illustrations, links, and responsive layout. |
+| **Ease of Sharing** | HTML is easier to share and read in a browser; Markdown often needs an editor or a special renderer. |
+| **Two-way Interaction** | HTML artifacts can include sliders, knobs, previews, and copy-back controls that let the reader manipulate the output. |
+| **Data Ingestion** | Claude Code is especially good at producing these artifacts because it can ingest filesystem context, MCP data, browser context, and git history. |
+| **It’s Joyful** | HTML output can feel more engaging, involving, and fun to work with. |
 
-## 触发场景
+Two additional source notes matter:
 
-合适 HTML 的场景（优先使用 HTML）：
+- Thariq explicitly warns that you do **not** need a heavy `/html` skill to start; often you can just ask for "an HTML file" or "an HTML artifact".
+- In the FAQ, he also acknowledges real downsides: **HTML takes longer to generate** and **HTML diffs are noisy and harder to review in version control**.
 
-- **代码审查 / PR 总结** — 差异对比 + 严重性标记 + 跳转链接 + 建议复选框
-- **技术方案 / 实施计划** — 甘特图 + 数据流图 + 风险表 + mockup
-- **知识解释 / 研究摘要** — TL;DR 盒 + 可折叠步骤 + tabbed 代码片段 + FAQ
-- **状态报告 / 周报** — 已完成/延期/图表 + 快速浏览格式
-- **对比分析** — 多个方案并排对比，trade-off 标注
-- **排行榜 / 评分卡** — 富格式表格 + 指标 + 图标
-- **多步教程 / 文档** — 侧边导航 + 进度指示
+See `references/thariq-original-claims.md` for a closer source summary.
 
-仍用 Markdown 的场景：
-- **短消息 / 简单回答** — 2-3 句话的答案
-- **纯代码片段** — 无需上下文修饰的代码
-- **用户要求 Markdown** — 编辑、复制、粘贴到 Wiki
-- **公开可转发内容** — 飞书/小红书/微博，Markdown 兼容性更好
+## Practical guidance derived from the post
 
-## 模板骨架
+The sections below are **operational guidance inspired by Thariq's post**, not a claim that every line is his exact wording.
 
-以下是通用的 HTML 输出模板，适用大部分场景。核心特征：
+### Good trigger scenarios for HTML
 
-1. 单文件自包含（CSS inline）
-2. 默认**亮色主题**（Thariq 原始示例采用 light mode）
-3. 通过 `prefers-color-scheme` 支持暗色自动切换（不默认暗色）
-4. 无外部依赖，浏览器直接打开
-5. 可折叠 section、内联代码高亮、表格、SVG 图表
+- **Code reviews / PR summaries** — diff comparison, severity markers, jump links, and review guidance
+- **Technical proposals / implementation plans** — timelines, data-flow diagrams, risk tables, and mockups
+- **Knowledge explanations / research summaries** — TL;DR boxes, collapsible steps, annotated snippets, and diagrams
+- **Status reports / weekly updates** — shipped/slipped work, charts, and skim-friendly layout
+- **Comparative analysis** — side-by-side option comparison with trade-off annotations
+- **Interactive tuning artifacts** — sliders, knobs, previews, or copy-back controls for prompts, configs, or designs
+- **Structured editing interfaces** — triage boards, feature-flag editors, dataset curation views, or approval tools
 
-参见 `templates/default-report.html` 用于复制修改。
+### Cases where Markdown may still be better
 
-### 配色关键说明
+This is practical guidance, not a direct quote from Thariq.
 
-> **重要**：Thariq 的 20 个原始示例全部使用**亮色主题**（象牙白 `#FAF9F5` 背景 + 深灰 `#141413` 文字）。社区和 AI 开发者生态中流行的"暗色默认"（GitHub dark `#0D1117` 风格）是开发者工具文化的自发产物，**不是 Thariq 的主张**。
+- **Short messages / simple answers** — two or three sentences do not need extra structure
+- **Plain code snippets** — when the code stands on its own without explanation
+- **User explicitly requests Markdown** — for editing, copying, or pasting into a wiki
+- **Version-controlled working docs** — Markdown diffs are often cleaner and easier to review
+- **Quick iteration** — HTML often takes longer to generate than Markdown
+- **Publicly shareable social content** — Feishu, Xiaohongshu, Weibo, and similar surfaces may have better Markdown compatibility
 
-本技能默认提供亮色主题，通过 `@media (prefers-color-scheme: dark)` 自适应暗色。
+## Template skeleton
 
-| 角色 | 亮色默认 | 暗色自适应 |
-|------|---------|-----------|
-| 背景 | `#FAF9F5` | `#0D1117` |
-| 卡片 | `#FFFFFF` | `#161B22` |
-| 正文 | `#3D3D3A` | `#E6EDF3` |
-| 标题 | `#141413` | `#F0F6FC` |
-| 强调色 | `#D97757` (暖陶) | `#58A6FF` (蓝) |
-| 边框 | `#D1CFC5` | `#30363D` |
+The following is a general-purpose HTML output template that works for many scenarios. Key traits:
 
-## 场景决策表
+1. Single-file and self-contained with inline CSS
+2. **Light theme by default**; Thariq's examples are predominantly light themed
+3. Automatic dark-mode support through `prefers-color-scheme`; dark mode is not forced by default
+4. No external dependencies; opens directly in a browser
+5. Support for collapsible sections, inline code highlighting, tables, and SVG charts
 
-| 用户需求 | 输出格式 | 理由 |
-|---------|---------|------|
-| "解释这个 PR" | HTML | 需要 diff + 标注 + 建议复选框 |
-| "帮我写周报" | HTML | 表格 + 图表 + 快速浏览 |
-| "这个代码怎么工作" | HTML | 调用图 + 可折叠步骤 |
-| "对比 A 和 B" | HTML | 并排对比 + tradeoff 标注 |
-| "现在几点了" | Markdown | 单纯不需要样式 |
-| "怎么安装 X" | HTML（有步骤）或 Markdown（短） | 看步骤数量 |
-| "这个概念的原理" | HTML | 交互式 explainer + 图示 |
-| 发到飞书群 | Markdown | 飞书原生渲染 Markdown |
+Use `templates/default-report.html` as a starting point for copy-and-modify workflows.
 
-## 常见陷阱
+### Important color guidance
 
-- **不要每次都用 HTML**：短回答用 Markdown 更快更省 token
-- **不要伪装成手写**：HTML 的设计美学是"Agent 帮您整理好的"风格，标明即可
-- **避免过度交互**：checkbox 和按钮在实际阅读时可能没用，评估场景是否需要
-- **注意文件大小**：超长 HTML 不如拆成多文件或使用折叠机制
-- **Don't force dark mode**：Thariq 本人用 light mode。暗色不是默认方案。
+> **Important**: Thariq's example set is visually dominated by **light themes**: ivory `#FAF9F5` background plus dark gray `#141413` text. The common "dark by default" aesthetic in AI and developer-tool ecosystems is a broader developer-culture convention, **not the main visual takeaway of his examples**.
+
+This skill defaults to a light theme and adapts to dark mode through `@media (prefers-color-scheme: dark)`.
+
+| Role | Light default | Dark adaptive |
+|------|---------------|---------------|
+| Background | `#FAF9F5` | `#0D1117` |
+| Card | `#FFFFFF` | `#161B22` |
+| Body text | `#3D3D3A` | `#E6EDF3` |
+| Heading | `#141413` | `#F0F6FC` |
+| Accent | `#D97757` warm terracotta | `#58A6FF` blue |
+| Border | `#D1CFC5` | `#30363D` |
+
+## Scenario decision table
+
+| User request | Output format | Reason |
+|--------------|---------------|--------|
+| "Explain this PR" | HTML | Benefits from visual diff explanation and annotations |
+| "Help me write a weekly report" | HTML | Benefits from charts, sections, and skim-friendly formatting |
+| "How does this code work?" | HTML | Benefits from diagrams, annotated snippets, and clearer structure |
+| "Compare A and B" | HTML | Side-by-side comparison is easier in HTML |
+| "What time is it?" | Markdown | Pure answer, no layout needed |
+| "How do I install X?" | HTML if long; Markdown if short | Depends on how much scaffolding the explanation needs |
+| "Tune this prompt/config/design" | HTML | Interaction and live preview can help |
+| "Post this to a Feishu group" | Markdown | Native Markdown compatibility may be better |
+
+## Common pitfalls
+
+- **Do not use HTML every time**: short answers are often better in Markdown.
+- **Do not over-attribute claims**: separate what the source explicitly says from your own derived guidance.
+- **Avoid excessive interactivity**: controls should serve a clear reading or editing purpose.
+- **Remember the tradeoffs**: HTML can be slower to generate and harder to diff in version control.
+- **Watch file size**: very long HTML is often worse than multiple files or a carefully collapsed single file.
+- **Do not force dark mode**: dark mode is not the default recommendation implied by Thariq's examples.
 
 ## References
 
-- `references/thariq-original-claims.md` — Thariq 五大主张原文引用 + 社区讨论总结
-- `references/dark-vs-light-context.md` — AI 输出 HTML 的暗色/亮色选择背景与讨论
-- `templates/default-report.html` — 通用报告模板（亮色默认 + 暗色自适应）
+- `references/thariq-original-claims.md` — source-faithful summary of the original post, its sections, FAQ tradeoffs, and community discussion
+- `references/dark-vs-light-context.md` — background and discussion on dark-vs-light choices for AI-generated HTML
+- `templates/default-report.html` — general report template with a light default theme and adaptive dark mode
