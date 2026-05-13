@@ -121,5 +121,4 @@ This skill defaults to a light theme and adapts to dark mode through `@media (pr
 ## References
 
 - `references/thariq-original-claims.md` — source-faithful summary of the original post, its sections, FAQ tradeoffs, and community discussion
-- `references/dark-vs-light-context.md` — background and discussion on dark-vs-light choices for AI-generated HTML
 - `templates/default-report.html` — general report template with a light default theme and adaptive dark mode
