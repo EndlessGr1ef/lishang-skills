@@ -1,13 +1,7 @@
 ---
 name: ai-html-output
-description: Use HTML instead of Markdown as an AI output format for reports, code reviews, technical plans, research summaries, status updates, and similar deliverables. Derived from Thariq Shihipar's "The Unreasonable Effectiveness of HTML" post and examples. Includes a source-faithful summary, practical trigger scenarios, a template skeleton, and color-theme conventions.
-version: 1.0.0
-metadata:
-  hermes:
-    tags: [html, output-format, report, code-review, markdown, content]
-    related_skills: [huashu-design, claude-design, sketch]
-    priority: optional
-platforms: [linux, macos, windows]
+description: Use HTML instead of Markdown as an AI output format for reports, code reviews, technical plans, research summaries, status updates, and similar deliverables. Includes Mermaid diagram support via CDN. Derived from Thariq Shihipar's "The Unreasonable Effectiveness of HTML" post and examples. Includes a source-faithful summary, practical trigger scenarios, a template skeleton, and color-theme conventions.
+version: 1.1.0
 ---
 
 # AI HTML Output
@@ -76,8 +70,9 @@ The following is a general-purpose HTML output template that works for many scen
 1. Single-file and self-contained with inline CSS
 2. **Light theme by default**; Thariq's examples are predominantly light themed
 3. Automatic dark-mode support through `prefers-color-scheme`; dark mode is not forced by default
-4. No external dependencies; opens directly in a browser
+4. No build-time dependencies; opens directly in a browser (Mermaid is loaded from CDN at runtime)
 5. Support for collapsible sections, inline code highlighting, tables, and SVG charts
+6. Built-in [Mermaid](https://mermaid.js.org) diagram rendering via CDN import
 
 Use `templates/default-report.html` as a starting point for copy-and-modify workflows.
 
@@ -95,6 +90,39 @@ This skill defaults to a light theme and adapts to dark mode through `@media (pr
 | Heading | `#141413` | `#F0F6FC` |
 | Accent | `#D97757` warm terracotta | `#58A6FF` blue |
 | Border | `#D1CFC5` | `#30363D` |
+
+## Mermaid diagrams in HTML
+
+The template includes [Mermaid](https://mermaid.js.org) loaded from CDN (`https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs`, ~3.3MB, browser-cached across pages). Use `<pre class="mermaid">` to render diagrams directly in HTML:
+
+```html
+<pre class="mermaid">
+graph LR
+  A[Start] --> B{Decision}
+  B -->|Yes| C[Action]
+  B -->|No| D[End]
+</pre>
+```
+
+### When to use Mermaid
+
+- **Flowcharts**, **sequence diagrams**, **state diagrams**, **class diagrams** — any structural/behavioral visualization
+- **Gantt charts**, **pie charts**, **timelines** — quantitative or temporal data
+- **C4 architecture diagrams**, **ER diagrams**, **mindmaps** — architecture and data modeling
+- **Git graphs**, **user journeys**, **quadrant charts** — process and analysis views
+
+Prefer Mermaid over ASCII art, text descriptions, or static SVG mockups.
+
+### Theme adaptation
+
+The template auto-detects `prefers-color-scheme` and sets Mermaid's theme to `default` (light) or `dark` accordingly. On OS-level theme change, the page reloads to re-render diagrams.
+
+### Limitations
+
+- **CDN dependency**: Mermaid JS (~3.3MB) is loaded from jsDelivr at first open. Subsequent HTML files sharing the same CDN URL reuse the browser cache.
+- **`securityLevel: strict`** is the default — click/hover interactions on diagram nodes are disabled. Change to `"loose"` if user-trusted diagrams need interactivity.
+- **Dynamic content**: If diagram definitions are inserted via `innerHTML` after page load, call `await mermaid.run()` manually instead of relying on `startOnLoad`.
+- Not suitable for very short replies or pure-code outputs — only use Mermaid when a diagram genuinely improves understanding.
 
 ## Scenario decision table
 
