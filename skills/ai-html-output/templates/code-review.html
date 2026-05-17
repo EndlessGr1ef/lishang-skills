@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{TITLE} · Code Review</title>
+<style>
+  :root {
+    --bg: #FAF9F5;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F4F1E8;
+    --text: #3D3D3A;
+    --text-muted: #87867F;
+    --heading: #141413;
+    --accent: #D97757;
+    --accent-soft: #E9DDD0;
+    --border: #D1CFC5;
+    --border-strong: #B9B5AA;
+    --code-bg: #F0EEE6;
+    --shadow: 0 10px 30px rgba(20, 20, 19, 0.05);
+    --radius: 16px;
+    --radius-sm: 12px;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace;
+    --green-bg: #E8F5EC;
+    --green-text: #1A7F37;
+    --yellow-bg: #FFF7D6;
+    --yellow-text: #9A6700;
+    --red-bg: #FDECEC;
+    --red-text: #CF222E;
+    --blue-bg: #EAF2FF;
+    --blue-text: #2859C5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0D1117;
+      --bg-card: #161B22;
+      --bg-soft: #11161D;
+      --text: #E6EDF3;
+      --text-muted: #8B949E;
+      --heading: #F0F6FC;
+      --accent: #58A6FF;
+      --accent-soft: #1F2A37;
+      --border: #30363D;
+      --border-strong: #484F58;
+      --code-bg: #1C2128;
+      --shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+      --green-bg: rgba(46, 160, 67, 0.18);
+      --green-text: #7EE787;
+      --yellow-bg: rgba(187, 128, 9, 0.18);
+      --yellow-text: #E3B341;
+      --red-bg: rgba(248, 81, 73, 0.18);
+      --red-text: #FF7B72;
+      --blue-bg: rgba(56, 139, 253, 0.18);
+      --blue-text: #79C0FF;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    padding: 32px 20px 72px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .page { max-width: 1080px; margin: 0 auto; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; padding: 12px 16px; margin-bottom: 8px;
+    border: 1px solid var(--border); border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-card) 86%, transparent);
+    backdrop-filter: blur(10px); box-shadow: var(--shadow);
+  }
+  .topbar-left, .topbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+    padding: 8px 12px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted);
+  }
+  .pill.review-tag { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); background: var(--accent-soft); }
+  .pill.status-open { color: var(--green-text); border-color: color-mix(in srgb, var(--green-text) 30%, var(--border)); background: var(--green-bg); }
+  .pill.status-merged { color: var(--blue-text); border-color: color-mix(in srgb, var(--blue-text) 30%, var(--border)); background: var(--blue-bg); }
+  .pill.status-closed { color: var(--red-text); border-color: color-mix(in srgb, var(--red-text) 30%, var(--border)); background: var(--red-bg); }
+
+  .report-header {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 4px); padding: 32px;
+    box-shadow: var(--shadow); margin-bottom: 24px;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-bottom: 12px; color: var(--accent);
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(30px, 4vw, 40px); line-height: 1.12;
+    letter-spacing: -0.02em; color: var(--heading); margin-bottom: 12px;
+  }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 8px; color: var(--text-muted); font-size: 12px;
+  }
+
+  /* Summary box */
+  .summary-box {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 58%, var(--bg-card)), var(--bg-card));
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px; box-shadow: var(--shadow); margin: 24px 0;
+  }
+  .summary-title { font-weight: 700; color: var(--heading); margin-bottom: 8px; }
+
+  /* File sections */
+  .file-review {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 4px); padding: 24px 32px;
+    box-shadow: var(--shadow); margin: 24px 0;
+  }
+  .file-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .file-name {
+    font-family: var(--mono); font-size: 14px; font-weight: 600;
+    color: var(--heading);
+  }
+  .file-stats {
+    display: flex; gap: 12px; font-family: var(--mono); font-size: 12px;
+  }
+  .stat-add { color: var(--green-text); }
+  .stat-del { color: var(--red-text); }
+  .stat-chg { color: var(--yellow-text); }
+
+  /* Diff blocks */
+  .diff-block {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; margin: 16px 0;
+  }
+  .diff-header {
+    background: color-mix(in srgb, var(--bg-soft) 60%, var(--bg-card));
+    padding: 8px 16px; font-family: var(--mono); font-size: 12px;
+    color: var(--text-muted); border-bottom: 1px solid var(--border);
+  }
+  .diff-body { overflow-x: auto; }
+  .diff-body pre {
+    margin: 0; padding: 12px 16px; font-family: var(--mono);
+    font-size: 12px; line-height: 1.666; background: none; border: none;
+    white-space: pre;
+  }
+  .diff-added { background: var(--green-bg); color: var(--green-text); }
+  .diff-removed { background: var(--red-bg); color: var(--red-text); }
+  .diff-context { color: var(--text-muted); }
+
+  /* Annotations */
+  .annotation {
+    border-left: 4px solid var(--accent);
+    background: color-mix(in srgb, var(--accent-soft) 60%, var(--bg-card));
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 12px 16px; margin: 16px 0;
+  }
+  .annotation.blocking { border-left-color: var(--red-text); background: color-mix(in srgb, var(--red-bg) 60%, var(--bg-card)); }
+  .annotation.suggestion { border-left-color: var(--yellow-text); background: color-mix(in srgb, var(--yellow-bg) 60%, var(--bg-card)); }
+  .annotation.nice { border-left-color: var(--green-text); background: color-mix(in srgb, var(--green-bg) 60%, var(--bg-card)); }
+  .annotation.question { border-left-color: var(--blue-text); background: color-mix(in srgb, var(--blue-bg) 60%, var(--bg-card)); }
+
+  .annotation-header {
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 700; color: var(--heading); margin-bottom: 8px;
+  }
+
+  /* Tags */
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: var(--mono); font-size: 12px;
+    padding: 4px 8px; border-radius: 999px; border: 1px solid transparent;
+  }
+  .tag.blocking { background: var(--red-bg); color: var(--red-text); }
+  .tag.suggestion { background: var(--yellow-bg); color: var(--yellow-text); }
+  .tag.nice { background: var(--green-bg); color: var(--green-text); }
+  .tag.question { background: var(--blue-bg); color: var(--blue-text); }
+
+  /* Risk matrix */
+  .risk-section {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 4px); padding: 24px 32px;
+    box-shadow: var(--shadow); margin: 24px 0;
+  }
+  .risk-title {
+    font-family: var(--serif); font-weight: 500;
+    font-size: 20px; color: var(--heading); margin-bottom: 16px;
+  }
+  .risk-matrix {
+    display: grid;
+    grid-template-columns: auto repeat(3, 1fr);
+    gap: 8px; margin: 16px 0;
+  }
+  .risk-cell {
+    padding: 12px 16px; border: 1px solid var(--border);
+    border-radius: 8px; text-align: center; font-size: 12px;
+  }
+  .risk-cell.header {
+    font-weight: 700; color: var(--heading); background: var(--bg-soft);
+  }
+  .risk-cell.low { background: var(--green-bg); color: var(--green-text); }
+  .risk-cell.medium { background: var(--yellow-bg); color: var(--yellow-text); }
+  .risk-cell.high { background: var(--red-bg); color: var(--red-text); }
+  .risk-cell.empty { border: none; background: transparent; }
+
+  /* Decision */
+  .decision-section {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 4px); padding: 24px 32px;
+    box-shadow: var(--shadow); margin: 24px 0;
+  }
+  .decision-options {
+    display: grid; gap: 12px; margin: 16px 0;
+  }
+  .decision-option {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border: 2px solid var(--border);
+    border-radius: var(--radius-sm); cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .decision-option:hover { border-color: var(--accent); }
+  .decision-option:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 24%, transparent);
+  }
+  .decision-option input[type="radio"] { accent-color: var(--accent); }
+  .decision-option input[type="radio"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .decision-option label { flex: 1; cursor: pointer; font-weight: 600; }
+  .decision-option .reason { color: var(--text-muted); font-size: 12px; margin-top: 4px; }
+  .decision-option.approve { border-left: 4px solid var(--green-text); }
+  .decision-option.changes { border-left: 4px solid var(--yellow-text); }
+  .decision-option.hold { border-left: 4px solid var(--red-text); }
+
+  .footer {
+    margin-top: 32px; padding: 16px 4px 0;
+    border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text-muted);
+    display: flex; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 24px 16px 56px; }
+    .report-header { padding: 24px 16px; }
+    .file-review, .risk-section, .decision-section { padding: 16px; }
+    .file-header { flex-direction: column; align-items: flex-start; }
+    .risk-matrix { grid-template-columns: auto repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="pill review-tag">Code Review</span>
+      <span class="pill">{FILES_CHANGED} files</span>
+    </div>
+    <div class="topbar-right">
+      <span class="pill status-{PR_STATUS}">{PR_STATUS}</span>
+      <span class="pill">Light-first</span>
+    </div>
+  </div>
+
+  <header class="report-header">
+    <div class="eyebrow">PR Review · {PR_NUMBER}</div>
+    <h1>{TITLE}</h1>
+    <div class="meta-row">
+      <span>Author: {AUTHOR}</span>
+      <span>·</span>
+      <span>{DATE}</span>
+      <span>·</span>
+      <span>{BRANCH}</span>
+      <span>·</span>
+      <span>{COMMITS} commits</span>
+    </div>
+  </header>
+
+  <!-- Summary -->
+  <div class="summary-box">
+    <div class="summary-title">Summary</div>
+    <p>{SUMMARY_TEXT}</p>
+  </div>
+
+  <!-- File Reviews -->
+  <div class="file-review">
+    <div class="file-header">
+      <span class="file-name">{FILE_PATH}</span>
+      <div class="file-stats">
+        <span class="stat-chg">{CHANGES} changes</span>
+        <span class="stat-add">+{INSERTIONS}</span>
+        <span class="stat-del">-{DELETIONS}</span>
+      </div>
+    </div>
+
+    <div class="diff-block">
+      <div class="diff-header">{DIFF_RANGE}</div>
+      <div class="diff-body">
+        <pre class="diff-removed">- {OLD_LINE}</pre>
+        <pre class="diff-added">+ {NEW_LINE}</pre>
+        <pre class="diff-context">  {CONTEXT_LINE}</pre>
+      </div>
+    </div>
+
+    <div class="annotation {SEVERITY_1}">
+      <div class="annotation-header">
+        <span class="tag {SEVERITY_1}">{SEVERITY_LABEL_1}</span>
+        <span>{ANNOTATION_TITLE_1}</span>
+      </div>
+      <p>{ANNOTATION_BODY_1}</p>
+    </div>
+
+    <div class="annotation {SEVERITY_2}">
+      <div class="annotation-header">
+        <span class="tag {SEVERITY_2}">{SEVERITY_LABEL_2}</span>
+        <span>{ANNOTATION_TITLE_2}</span>
+      </div>
+      <p>{ANNOTATION_BODY_2}</p>
+    </div>
+  </div>
+
+  <!-- Risk Matrix -->
+  <div class="risk-section">
+    <div class="risk-title">Risk Assessment</div>
+    <div class="risk-matrix">
+      <div class="risk-cell empty"></div>
+      <div class="risk-cell header">Low Likelihood</div>
+      <div class="risk-cell header">Medium</div>
+      <div class="risk-cell header">High</div>
+
+      <div class="risk-cell header">High Impact</div>
+      <div class="risk-cell medium">{RISK_HM}</div>
+      <div class="risk-cell high">{RISK_HH}</div>
+      <div class="risk-cell high">{RISK_HH_2}</div>
+
+      <div class="risk-cell header">Medium Impact</div>
+      <div class="risk-cell low">{RISK_ML}</div>
+      <div class="risk-cell medium">{RISK_MM}</div>
+      <div class="risk-cell high">{RISK_MH}</div>
+
+      <div class="risk-cell header">Low Impact</div>
+      <div class="risk-cell low">{RISK_LL}</div>
+      <div class="risk-cell low">{RISK_LM}</div>
+      <div class="risk-cell medium">{RISK_LH}</div>
+    </div>
+  </div>
+
+  <!-- Decision -->
+  <div class="decision-section">
+    <div class="risk-title">Review Decision</div>
+    <div class="decision-options">
+      <div class="decision-option approve">
+        <input type="radio" name="decision" id="approve" value="approve">
+        <label for="approve">
+          <div>Approve</div>
+          <div class="reason">{APPROVE_REASON}</div>
+        </label>
+      </div>
+      <div class="decision-option changes">
+        <input type="radio" name="decision" id="changes" value="changes">
+        <label for="changes">
+          <div>Request Changes</div>
+          <div class="reason">{CHANGES_REASON}</div>
+        </label>
+      </div>
+      <div class="decision-option hold">
+        <input type="radio" name="decision" id="hold" value="hold">
+        <label for="hold">
+          <div>Hold</div>
+          <div class="reason">{HOLD_REASON}</div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Generated by AI HTML Output</span>
+    <span>Single-file · Browser-friendly</span>
+  </div>
+</div>
+</body>
+</html>

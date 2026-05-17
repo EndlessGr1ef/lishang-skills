@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{TITLE} · Data Report</title>
+<style>
+  :root {
+    --bg: #FAF9F5;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F4F1E8;
+    --text: #3D3D3A;
+    --text-muted: #87867F;
+    --heading: #141413;
+    --accent: #D97757;
+    --accent-soft: #E9DDD0;
+    --border: #D1CFC5;
+    --border-strong: #B9B5AA;
+    --code-bg: #F0EEE6;
+    --shadow: 0 10px 30px rgba(20, 20, 19, 0.05);
+    --radius: 16px;
+    --radius-sm: 12px;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace;
+    --green-bg: #E8F5EC;
+    --green-text: #1A7F37;
+    --yellow-bg: #FFF7D6;
+    --yellow-text: #9A6700;
+    --red-bg: #FDECEC;
+    --red-text: #CF222E;
+    --blue-bg: #EAF2FF;
+    --blue-text: #2859C5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0D1117;
+      --bg-card: #161B22;
+      --bg-soft: #11161D;
+      --text: #E6EDF3;
+      --text-muted: #8B949E;
+      --heading: #F0F6FC;
+      --accent: #58A6FF;
+      --accent-soft: #1F2A37;
+      --border: #30363D;
+      --border-strong: #484F58;
+      --code-bg: #1C2128;
+      --shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+      --green-bg: rgba(46, 160, 67, 0.18);
+      --green-text: #7EE787;
+      --yellow-bg: rgba(187, 128, 9, 0.18);
+      --yellow-text: #E3B341;
+      --red-bg: rgba(248, 81, 73, 0.18);
+      --red-text: #FF7B72;
+      --blue-bg: rgba(56, 139, 253, 0.18);
+      --blue-text: #79C0FF;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    padding: 32px 20px 72px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .page { max-width: 1080px; margin: 0 auto; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-card) 86%, transparent);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow);
+  }
+  .topbar-left, .topbar-right {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+    padding: 8px 12px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-muted);
+  }
+  .pill.report-tag {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+    background: var(--accent-soft);
+  }
+
+  .report-header {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 4px);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-bottom: 12px; color: var(--accent);
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(30px, 4vw, 40px); line-height: 1.12;
+    letter-spacing: -0.02em; color: var(--heading); margin-bottom: 12px;
+  }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 8px; color: var(--text-muted); font-size: 12px;
+  }
+
+  /* KPI Cards */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+  .kpi-label {
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 8px;
+  }
+  .kpi-value {
+    font-size: 28px; font-weight: 700; line-height: 1.1;
+    color: var(--heading); margin-bottom: 8px;
+  }
+  .kpi-delta {
+    font-size: 12px; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .kpi-delta.up { color: var(--green-text); }
+  .kpi-delta.down { color: var(--red-text); }
+  .kpi-delta.neutral { color: var(--text-muted); }
+
+  /* Charts */
+  .chart-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 4px);
+    padding: 24px 32px;
+    box-shadow: var(--shadow);
+    margin: 24px 0;
+  }
+  .chart-title {
+    font-family: var(--serif); font-weight: 500;
+    font-size: 20px; color: var(--heading); margin-bottom: 16px;
+  }
+  .chart-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    margin: 24px 0;
+  }
+  /* CRITICAL: explicit container height for Chart.js */
+  .chart-wrap {
+    position: relative;
+    height: 280px;
+    width: 100%;
+  }
+
+  /* Table */
+  .table-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 4px);
+    padding: 24px 32px;
+    box-shadow: var(--shadow);
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 14px; min-width: 480px;
+  }
+  th, td {
+    text-align: left; vertical-align: top;
+    padding: 12px 14px; border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-weight: 700; color: var(--heading);
+    background: var(--bg-soft); position: sticky; top: 0;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: color-mix(in srgb, var(--bg-soft) 40%, var(--bg-card)); }
+
+  /* Insights */
+  .insight-section {
+    margin: 24px 0;
+  }
+  .insight-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 24px;
+    box-shadow: var(--shadow);
+    margin: 16px 0;
+  }
+  .insight-title {
+    font-weight: 700; color: var(--heading); margin-bottom: 8px;
+  }
+  .insight-card.note { border-left-color: var(--blue-text); }
+  .insight-card.warning { border-left-color: var(--yellow-text); }
+  .insight-card.danger { border-left-color: var(--red-text); }
+  .insight-card.success { border-left-color: var(--green-text); }
+
+  .footer {
+    margin-top: 32px; padding: 16px 4px 0;
+    border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text-muted);
+    display: flex; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 24px 16px 56px; }
+    .report-header { padding: 24px 16px; }
+    .chart-section, .table-section { padding: 16px; }
+    .kpi-strip { grid-template-columns: 1fr; }
+    .chart-row { grid-template-columns: 1fr; }
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="pill report-tag">{CATEGORY}</span>
+      <span class="pill">Data Report</span>
+    </div>
+    <div class="topbar-right">
+      <span class="pill">Chart.js v4</span>
+      <span class="pill">Light-first</span>
+    </div>
+  </div>
+
+  <header class="report-header">
+    <div class="eyebrow">AI-generated data report</div>
+    <h1>{TITLE}</h1>
+    <div class="meta-row">
+      <span>{DATE}</span>
+      <span>·</span>
+      <span>{TIME_RANGE}</span>
+      <span>·</span>
+      <span>Source: {DATA_SOURCE}</span>
+    </div>
+  </header>
+
+  <!-- KPI Cards -->
+  <section class="kpi-strip">
+    <!-- Repeat for each KPI -->
+    <div class="kpi-card">
+      <div class="kpi-label">{KPI_LABEL_1}</div>
+      <div class="kpi-value">{KPI_VALUE_1}</div>
+      <div class="kpi-delta {KPI_DIRECTION_1}">{KPI_DELTA_1}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">{KPI_LABEL_2}</div>
+      <div class="kpi-value">{KPI_VALUE_2}</div>
+      <div class="kpi-delta {KPI_DIRECTION_2}">{KPI_DELTA_2}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">{KPI_LABEL_3}</div>
+      <div class="kpi-value">{KPI_VALUE_3}</div>
+      <div class="kpi-delta {KPI_DIRECTION_3}">{KPI_DELTA_3}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">{KPI_LABEL_4}</div>
+      <div class="kpi-value">{KPI_VALUE_4}</div>
+      <div class="kpi-delta {KPI_DIRECTION_4}">{KPI_DELTA_4}</div>
+    </div>
+  </section>
+
+  <!-- Charts -->
+  <section class="chart-section">
+    <div class="chart-title">{CHART_SECTION_TITLE}</div>
+    <div class="chart-row">
+      <div class="chart-wrap">
+        <canvas id="chart1"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chart2"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- Data Table -->
+  <section class="table-section">
+    <div class="chart-title">{TABLE_TITLE}</div>
+    <table>
+      <thead>
+        <tr>
+          <th>{COL_1}</th>
+          <th>{COL_2}</th>
+          <th>{COL_3}</th>
+          <th>{COL_4}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{ROW1_COL1}</td>
+          <td>{ROW1_COL2}</td>
+          <td>{ROW1_COL3}</td>
+          <td>{ROW1_COL4}</td>
+        </tr>
+        <tr>
+          <td>{ROW2_COL1}</td>
+          <td>{ROW2_COL2}</td>
+          <td>{ROW2_COL3}</td>
+          <td>{ROW2_COL4}</td>
+        </tr>
+        <!-- Add more rows as needed -->
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Insights -->
+  <section class="insight-section">
+    <div class="chart-title">{INSIGHTS_TITLE}</div>
+    <div class="insight-card {INSIGHT_TYPE_1}">
+      <div class="insight-title">{INSIGHT_TITLE_1}</div>
+      <p>{INSIGHT_BODY_1}</p>
+    </div>
+    <div class="insight-card {INSIGHT_TYPE_2}">
+      <div class="insight-title">{INSIGHT_TITLE_2}</div>
+      <p>{INSIGHT_BODY_2}</p>
+    </div>
+    <div class="insight-card {INSIGHT_TYPE_3}">
+      <div class="insight-title">{INSIGHT_TITLE_3}</div>
+      <p>{INSIGHT_BODY_3}</p>
+    </div>
+  </section>
+
+  <div class="footer">
+    <span>Generated by AI HTML Output</span>
+    <span>Chart.js · Single-file · Browser-friendly</span>
+  </div>
+</div>
+
+<script>
+  // Example Chart.js configuration — replace with real data
+  const ctx1 = document.getElementById('chart1').getContext('2d');
+  const ctx2 = document.getElementById('chart2').getContext('2d');
+
+  // Detect dark mode for chart colors
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const chartText = isDark ? '#E6EDF3' : '#3D3D3A';
+  const chartGrid = isDark ? '#30363D' : '#D1CFC5';
+
+  const commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: chartText } }
+    },
+    scales: {
+      x: {
+        ticks: { color: chartText },
+        grid: { color: chartGrid }
+      },
+      y: {
+        ticks: { color: chartText },
+        grid: { color: chartGrid }
+      }
+    }
+  };
+
+  new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: ['{LABEL_A}', '{LABEL_B}', '{LABEL_C}'],
+      datasets: [{
+        label: '{DATASET_NAME}',
+        data: [Number('{VALUE_A}') || 0, Number('{VALUE_B}') || 0, Number('{VALUE_C}') || 0],
+        backgroundColor: ['#D97757', '#58A6FF', '#7EE787'],
+        borderRadius: 6
+      }]
+    },
+    options: commonOptions
+  });
+
+  new Chart(ctx2, {
+    type: 'line',
+    data: {
+      labels: ['{MONTH_1}', '{MONTH_2}', '{MONTH_3}', '{MONTH_4}'],
+      datasets: [{
+        label: '{TREND_NAME}',
+        data: [Number('{TREND_1}') || 0, Number('{TREND_2}') || 0, Number('{TREND_3}') || 0, Number('{TREND_4}') || 0],
+        borderColor: '#D97757',
+        backgroundColor: 'rgba(217, 119, 87, 0.12)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4
+      }]
+    },
+    options: commonOptions
+  });
+</script>
+</body>
+</html>

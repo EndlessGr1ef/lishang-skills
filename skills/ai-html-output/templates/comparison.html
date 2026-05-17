@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{TITLE} · Comparison</title>
+<style>
+  :root {
+    --bg: #FAF9F5;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F4F1E8;
+    --text: #3D3D3A;
+    --text-muted: #87867F;
+    --heading: #141413;
+    --accent: #D97757;
+    --accent-soft: #E9DDD0;
+    --border: #D1CFC5;
+    --border-strong: #B9B5AA;
+    --shadow: 0 10px 30px rgba(20, 20, 19, 0.05);
+    --radius: 16px;
+    --radius-sm: 12px;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace;
+    --green-bg: #E8F5EC;
+    --green-text: #1A7F37;
+    --yellow-bg: #FFF7D6;
+    --yellow-text: #9A6700;
+    --red-bg: #FDECEC;
+    --red-text: #CF222E;
+    --blue-bg: #EAF2FF;
+    --blue-text: #2859C5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0D1117;
+      --bg-card: #161B22;
+      --bg-soft: #11161D;
+      --text: #E6EDF3;
+      --text-muted: #8B949E;
+      --heading: #F0F6FC;
+      --accent: #58A6FF;
+      --accent-soft: #1F2A37;
+      --border: #30363D;
+      --border-strong: #484F58;
+      --shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+      --green-bg: rgba(46, 160, 67, 0.18);
+      --green-text: #7EE787;
+      --yellow-bg: rgba(187, 128, 9, 0.18);
+      --yellow-text: #E3B341;
+      --red-bg: rgba(248, 81, 73, 0.18);
+      --red-text: #FF7B72;
+      --blue-bg: rgba(56, 139, 253, 0.18);
+      --blue-text: #79C0FF;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    padding: 32px 20px 72px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .page { max-width: 1080px; margin: 0 auto; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; padding: 12px 16px; margin-bottom: 8px;
+    border: 1px solid var(--border); border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-card) 86%, transparent);
+    backdrop-filter: blur(10px); box-shadow: var(--shadow);
+  }
+  .topbar-left, .topbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+    padding: 8px 12px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted);
+  }
+  .pill.compare-tag { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); background: var(--accent-soft); }
+
+  .report-header {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 4px); padding: 32px;
+    box-shadow: var(--shadow); margin-bottom: 24px;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-bottom: 12px; color: var(--accent);
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(30px, 4vw, 40px); line-height: 1.12;
+    letter-spacing: -0.02em; color: var(--heading); margin-bottom: 12px;
+  }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 8px; color: var(--text-muted); font-size: 12px;
+  }
+
+  /* Verdict */
+  .verdict-box {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 24px;
+    box-shadow: var(--shadow); margin: 24px 0;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .verdict-label {
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .verdict-text {
+    font-size: 16px; font-weight: 600; color: var(--heading);
+  }
+  .verdict-winner { color: var(--green-text); }
+  .verdict-tie { color: var(--yellow-text); }
+  .verdict-depends { color: var(--blue-text); }
+
+  /* Comparison table */
+  .compare-section {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 4px); padding: 24px 32px;
+    box-shadow: var(--shadow); margin: 24px 0;
+    overflow-x: auto;
+  }
+  .section-title {
+    font-family: var(--serif); font-weight: 500;
+    font-size: 20px; color: var(--heading); margin-bottom: 16px;
+  }
+  .compare-table {
+    width: 100%; border-collapse: collapse; font-size: 16px; min-width: 520px;
+  }
+  .compare-table th, .compare-table td {
+    text-align: left; vertical-align: top;
+    padding: 16px; border-bottom: 1px solid var(--border);
+  }
+  .compare-table th {
+    font-weight: 700; color: var(--heading); background: var(--bg-soft);
+    position: sticky; top: 0;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table .criterion {
+    font-weight: 600; color: var(--heading); white-space: nowrap;
+  }
+  .compare-table .winner { background: var(--green-bg); }
+  .compare-table .loser { background: var(--red-bg); }
+  .compare-table .note {
+    display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px;
+  }
+  .compare-table .score {
+    font-family: var(--mono); font-size: 12px;
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    margin-left: 8px;
+  }
+
+  /* Tradeoff callouts */
+  .tradeoff-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(256px, 1fr));
+    gap: 16px; margin: 16px 0;
+  }
+  .tradeoff-card {
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px;
+  }
+  .tradeoff-title {
+    font-weight: 700; color: var(--heading); margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .tradeoff-body {
+    font-size: 14px; color: var(--text);
+  }
+
+  /* Decision matrix */
+  .matrix-section {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 4px); padding: 24px 32px;
+    box-shadow: var(--shadow); margin: 24px 0;
+    overflow-x: auto;
+  }
+  .matrix-table {
+    width: 100%; border-collapse: collapse; font-size: 16px; min-width: 480px;
+  }
+  .matrix-table th, .matrix-table td {
+    text-align: center; vertical-align: middle;
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+  }
+  .matrix-table th {
+    font-weight: 700; color: var(--heading); background: var(--bg-soft);
+  }
+  .matrix-table .criterion-name { text-align: left; font-weight: 600; }
+  .matrix-table .weight {
+    font-family: var(--mono); font-size: 12px; color: var(--text-muted);
+  }
+  .matrix-table .total-row td {
+    font-weight: 700; color: var(--heading);
+    border-top: 2px solid var(--border-strong); border-bottom: none;
+  }
+  .matrix-table .total-score {
+    font-size: 18px; color: var(--accent);
+  }
+
+  .footer {
+    margin-top: 32px; padding: 16px 4px 0;
+    border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text-muted);
+    display: flex; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 24px 16px 56px; }
+    .report-header { padding: 24px 16px; }
+    .compare-section, .matrix-section { padding: 16px; }
+    .verdict-box { flex-direction: column; align-items: flex-start; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="pill compare-tag">Comparison</span>
+      <span class="pill">{OPTION_A_NAME} vs {OPTION_B_NAME}</span>
+    </div>
+    <div class="topbar-right">
+      <span class="pill">Light-first</span>
+    </div>
+  </div>
+
+  <header class="report-header">
+    <div class="eyebrow">Option Analysis</div>
+    <h1>{TITLE}</h1>
+    <div class="meta-row">
+      <span>{DATE}</span>
+      <span>·</span>
+      <span>{CRITERIA_COUNT} criteria evaluated</span>
+    </div>
+  </header>
+
+  <!-- Verdict -->
+  <div class="verdict-box">
+    <span class="verdict-label">Verdict</span>
+    <span class="verdict-text {VERDICT_CLASS}">{VERDICT_TEXT}</span>
+  </div>
+
+  <!-- Attribute Comparison -->
+  <div class="compare-section">
+    <div class="section-title">Side-by-Side Comparison</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Criterion</th>
+          <th>{OPTION_A_NAME}</th>
+          <th>{OPTION_B_NAME}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="criterion">{CRIT_1_NAME}</td>
+          <td class="{CRIT_1_A_CLASS}">{CRIT_1_A_VALUE}<span class="note">{CRIT_1_A_NOTE}</span></td>
+          <td class="{CRIT_1_B_CLASS}">{CRIT_1_B_VALUE}<span class="note">{CRIT_1_B_NOTE}</span></td>
+        </tr>
+        <tr>
+          <td class="criterion">{CRIT_2_NAME}</td>
+          <td class="{CRIT_2_A_CLASS}">{CRIT_2_A_VALUE}<span class="note">{CRIT_2_A_NOTE}</span></td>
+          <td class="{CRIT_2_B_CLASS}">{CRIT_2_B_VALUE}<span class="note">{CRIT_2_B_NOTE}</span></td>
+        </tr>
+        <tr>
+          <td class="criterion">{CRIT_3_NAME}</td>
+          <td class="{CRIT_3_A_CLASS}">{CRIT_3_A_VALUE}<span class="note">{CRIT_3_A_NOTE}</span></td>
+          <td class="{CRIT_3_B_CLASS}">{CRIT_3_B_VALUE}<span class="note">{CRIT_3_B_NOTE}</span></td>
+        </tr>
+        <tr>
+          <td class="criterion">{CRIT_4_NAME}</td>
+          <td class="{CRIT_4_A_CLASS}">{CRIT_4_A_VALUE}<span class="note">{CRIT_4_A_NOTE}</span></td>
+          <td class="{CRIT_4_B_CLASS}">{CRIT_4_B_VALUE}<span class="note">{CRIT_4_B_NOTE}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Tradeoff Callouts -->
+  <div class="compare-section">
+    <div class="section-title">Key Tradeoffs</div>
+    <div class="tradeoff-grid">
+      <div class="tradeoff-card">
+        <div class="tradeoff-title">{TRADEOFF_1_TITLE}</div>
+        <div class="tradeoff-body">{TRADEOFF_1_BODY}</div>
+      </div>
+      <div class="tradeoff-card">
+        <div class="tradeoff-title">{TRADEOFF_2_TITLE}</div>
+        <div class="tradeoff-body">{TRADEOFF_2_BODY}</div>
+      </div>
+      <div class="tradeoff-card">
+        <div class="tradeoff-title">{TRADEOFF_3_TITLE}</div>
+        <div class="tradeoff-body">{TRADEOFF_3_BODY}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weighted Decision Matrix -->
+  <div class="matrix-section">
+    <div class="section-title">Weighted Decision Matrix</div>
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Criterion</th>
+          <th>Weight</th>
+          <th>{OPTION_A_NAME}</th>
+          <th>{OPTION_B_NAME}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="criterion-name">{MATRIX_1_NAME}</td>
+          <td class="weight">{MATRIX_1_WEIGHT}</td>
+          <td>{MATRIX_1_A}<span class="score" style="background:var(--blue-bg);color:var(--blue-text)">{MATRIX_1_A_W}</span></td>
+          <td>{MATRIX_1_B}<span class="score" style="background:var(--blue-bg);color:var(--blue-text)">{MATRIX_1_B_W}</span></td>
+        </tr>
+        <tr>
+          <td class="criterion-name">{MATRIX_2_NAME}</td>
+          <td class="weight">{MATRIX_2_WEIGHT}</td>
+          <td>{MATRIX_2_A}<span class="score" style="background:var(--blue-bg);color:var(--blue-text)">{MATRIX_2_A_W}</span></td>
+          <td>{MATRIX_2_B}<span class="score" style="background:var(--blue-bg);color:var(--blue-text)">{MATRIX_2_B_W}</span></td>
+        </tr>
+        <tr>
+          <td class="criterion-name">{MATRIX_3_NAME}</td>
+          <td class="weight">{MATRIX_3_WEIGHT}</td>
+          <td>{MATRIX_3_A}<span class="score" style="background:var(--blue-bg);color:var(--blue-text)">{MATRIX_3_A_W}</span></td>
+          <td>{MATRIX_3_B}<span class="score" style="background:var(--blue-bg);color:var(--blue-text)">{MATRIX_3_B_W}</span></td>
+        </tr>
+        <tr>
+          <td class="criterion-name">{MATRIX_4_NAME}</td>
+          <td class="weight">{MATRIX_4_WEIGHT}</td>
+          <td>{MATRIX_4_A}<span class="score" style="background:var(--blue-bg);color:var(--blue-text)">{MATRIX_4_A_W}</span></td>
+          <td>{MATRIX_4_B}<span class="score" style="background:var(--blue-bg);color:var(--blue-text)">{MATRIX_4_B_W}</span></td>
+        </tr>
+        <tr class="total-row">
+          <td class="criterion-name">Total</td>
+          <td class="weight">100%</td>
+          <td class="total-score">{TOTAL_A}</td>
+          <td class="total-score">{TOTAL_B}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <span>Generated by AI HTML Output</span>
+    <span>Single-file · Browser-friendly</span>
+  </div>
+</div>
+</body>
+</html>
