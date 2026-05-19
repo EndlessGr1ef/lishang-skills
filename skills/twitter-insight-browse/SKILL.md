@@ -1,12 +1,18 @@
 ---
 name: twitter-insight-browse
-description: 通过 opencli 复用浏览器登录态，自动拉取 Twitter/X 的 For You 时间线、特定话题搜索和讨论线程，并汇总成结构化的热点报告和深度分析。热门趋势（Trending）为可选内容，仅在用户明确要求时拉取。当用户说"查查 Twitter 最新帖子"、"拉取下最新推文"、"看看 X 上有啥热点"、"Twitter 上关于 XXX 的讨论"、"去 Twitter 上查一下"、"最新 tweet"等触发。也适用于需要深入了解某个在 Twitter 上发酵的技术/产品话题。
+description: 通过 opencli 复用浏览器登录态，默认自动拉取 Twitter/X 最新推文时间线（For You + Following），也支持特定话题搜索和讨论线程深挖，并汇总成结构化热点报告。用户只说"用 twitter-insight-browse"、"查 Twitter"、"拉最新"、"看看 X"等未指定话题的模糊请求时，直接执行最新推文扫描，不要只回复技能已加载。热门趋势（Trending）为可选内容，仅在用户明确要求时拉取。当用户说"查查 Twitter 最新帖子"、"拉取下最新推文"、"看看 X 上有啥热点"、"Twitter 上关于 XXX 的讨论"、"去 Twitter 上查一下"、"最新 tweet"等触发。也适用于需要深入了解某个在 Twitter 上发酵的技术/产品话题。
 ---
 
 # Twitter/X 热点洞察浏览
 
 ## Goal
 快速获取 Twitter/X 上的最新个性化推荐、热门趋势和特定话题讨论，以结构化报告形式呈现关键信息和社区观点。
+
+## Default Behavior
+
+当用户只是要求应用/使用这个 skill，或笼统要求"查 Twitter"、"看看 X"、"拉最新"，但没有给出具体话题、推文 ID 或深度分析目标时，默认执行 **Mode 1: 快速热点扫描**：拉取最新 For You + Following 时间线并总结。
+
+不要在这种默认场景中只回复"技能已加载"；应直接进行安装/连通性检查，然后拉取最新推文。
 
 ## Prerequisites & Pre-flight Check
 
@@ -31,7 +37,7 @@ bash scripts/check-install.sh
 ## Modes
 
 ### Mode 1: 快速热点扫描
-**触发**: "最新推文" / "有啥热点" / "For You 推荐"
+**触发**: 默认模式；"最新推文" / "有啥热点" / "For You 推荐" / "拉最新" / "看看 X"
 
 并行拉取 For You + Following 两个时间线：
 
@@ -42,7 +48,7 @@ opencli twitter timeline --type following --limit 15 -f md 2>&1
 
 - timeout: **120s**（首次加载常较慢）
 - 失败（Detached/SecurityError）重试一次
-- 输出：For You 表格 + Following 表格 + 🔑 推荐要点（3-5 条）
+- 输出：For You 详细表格 + Following 详细表格 + 🔑 推荐要点（3-5 条）+ 可深挖链接
 
 **可选 - Trending**: 仅当用户明确要求"热点趋势""trending"时执行：
 
@@ -99,17 +105,22 @@ opencli twitter thread "tweet-id" -f md 2>&1
 
 ## Output Templates
 
-### 时间线 / 搜索通用
+### 时间线通用（默认详细版）
 ```markdown
 ## 📱 [For You / 关注列表 / "关键词"] 
 
-| 作者 | 内容要点 | 热度 |
+| 作者 | 内容详解 | 热度 |
 |------|----------|------|
-| @author | 摘要 | 🔥 N👍 |
+| @author | **一两句话总结：** 用 1-2 句概括这条推文最重要的信息。<br><br>**详细内容概括：** 展开说明推文在说什么、背景是什么、作者观点或关键细节是什么；把重点内容用 **加粗** 标出来。 | 🔥 N👍 / N浏览 |
 
 ### 🔑 核心要点
 1. ...
+
+### 🔎 可继续深挖
+- @author: https://x.com/... — 深挖理由
 ```
+
+时间线输出默认要有信息密度：每条 `内容详解` 包含 **一两句话总结** 和 **详细内容概括** 两部分。总结内容和重点内容要用 **加粗** 显示；不要输出“为什么值得看”列；不要把 `内容详解` 压成 10-20 个字的短句。
 
 搜索场景在表格里加一列"时间"，深度报告在总结里按"官方/权威"、"实测/案例"、"社区评价"三类组织。
 
@@ -138,7 +149,7 @@ opencli twitter thread "tweet-id" -f md 2>&1
 
 1. `opencli doctor` 检查
 2. 并行：`twitter timeline --type for-you` + `twitter timeline --type following`
-3. 输出 For You 表格 + Following 表格 + 要点总结
+3. 输出 For You 详细表格 + Following 详细表格 + 要点总结 + 可深挖链接
 
 > Trending 仅在用户明确说"看看热门趋势"时才拉。
 
