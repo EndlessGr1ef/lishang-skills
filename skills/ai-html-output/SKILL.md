@@ -12,31 +12,15 @@ Use HTML instead of Markdown when AI output needs to be interactive, navigable, 
 
 ## Background
 
-On **May 8, 2026**, **Thariq Shihipar**, an engineering lead on Anthropic Claude Code, published a long-form post on X titled **"Using Claude Code: The Unreasonable Effectiveness of HTML"**, arguing that HTML is often a better output format than Markdown for many AI-generated artifacts.
+Derived from Thariq Shihipar's post *"Using Claude Code: The Unreasonable Effectiveness of HTML"* (May 2026). Core idea: HTML is a medium for laying out information in space — richer than Markdown for reading, though not always better for editing.
 
-- First 16 hours: 4.4M+ impressions, 8,200+ likes, 15,700+ bookmarks
-- Companion demo site: `thariqs.github.io/html-effectiveness/` with 20 HTML examples
-- Sparked major discussion on Hacker News, Simon Willison's blog, Threads, and LinkedIn
+Key takeaways:
 
-## Source-faithful summary of Thariq's post
+- HTML excels at information density, visual clarity, sharing, and two-way interaction
+- You often don't need a heavy `/html` skill — just ask for "an HTML file"
+- Tradeoffs: slower generation (~2-4x), noisy diffs, higher token usage
 
-The original post is structured around these themes:
-
-| Theme | What Thariq argues |
-|---|---|
-| **Information Density** | HTML can express richer structures than Markdown: tables, CSS-based design, SVG, scripts, interactions, workflows, spatial layouts, and images. |
-| **Visual Clarity & Ease of Reading** | Long specs and plans are easier to navigate as HTML with tabs, illustrations, links, and responsive layout. |
-| **Ease of Sharing** | HTML is easier to share and read in a browser; Markdown often needs an editor or a special renderer. |
-| **Two-way Interaction** | HTML artifacts can include sliders, knobs, previews, and copy-back controls that let the reader manipulate the output. |
-| **Data Ingestion** | Claude Code is especially good at producing these artifacts because it can ingest filesystem context, MCP data, browser context, and git history. |
-| **It’s Joyful** | HTML output can feel more engaging, involving, and fun to work with. |
-
-Two additional source notes matter:
-
-- Thariq explicitly warns that you do **not** need a heavy `/html` skill to start; often you can just ask for "an HTML file" or "an HTML artifact".
-- In the FAQ, he also acknowledges real downsides: **HTML takes longer to generate** and **HTML diffs are noisy and harder to review in version control**.
-
-See `references/thariq-original-claims.md` for a closer source summary.
+For the full source summary, see `references/thariq-original-claims.md`.
 
 ## Practical guidance derived from the post
 
@@ -62,6 +46,16 @@ This is practical guidance, not a direct quote from Thariq.
 - **Version-controlled working docs** — Markdown diffs are often cleaner and easier to review
 - **Quick iteration** — HTML often takes longer to generate than Markdown
 - **Platform-native sharing** — some social platforms and chat tools render Markdown natively but strip or mangle HTML
+
+## File output convention
+
+When generating an HTML artifact as a file, save it to an `html/` folder in the current working directory:
+
+```
+./html/{descriptive-name}.html
+```
+
+If the `html/` directory does not exist, create it. This keeps generated artifacts organized and separate from source files.
 
 ## Template skeleton
 
@@ -99,6 +93,15 @@ This skill defaults to a light theme and adapts to dark mode through `@media (pr
 | Heading | `#141413` | `#F0F6FC` |
 | Accent | `#D97757` warm terracotta | `#58A6FF` blue |
 | Border | `#D1CFC5` | `#30363D` |
+
+## Data visualization
+
+**Visual-first principle**: HTML is for human consumption. When information can be expressed visually — flows, relationships, sequences, hierarchies, trends, proportions — always prefer charts and diagrams over paragraphs. A single visual often carries more meaning and is faster to parse than several paragraphs of text. Default to visual structures for architecture, processes, comparisons, and data distributions; use text only for what cannot be shown visually.
+
+The templates support two primary visualization tools:
+
+- **Mermaid** — flowcharts, sequence diagrams, state diagrams, Gantt charts, and more
+- **Chart.js** — bar charts, line charts, pie charts, radar charts, and data-driven graphics
 
 ## Mermaid diagrams in HTML
 
