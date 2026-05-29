@@ -19,8 +19,8 @@
     --shadow: 0 10px 30px rgba(20, 20, 19, 0.05);
     --radius: 16px;
     --radius-sm: 12px;
-    --serif: Georgia, 'Times New Roman', serif;
-    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    
+    --sans: "Noto Sans SC", "Source Han Sans SC", system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --mono: ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace;
     --green-bg: #E8F5EC;
     --green-text: #1A7F37;
@@ -39,8 +39,8 @@
       --text: #E6EDF3;
       --text-muted: #8B949E;
       --heading: #F0F6FC;
-      --accent: #58A6FF;
-      --accent-soft: #1F2A37;
+      --accent: #E89B6C;
+      --accent-soft: #2A1E15;
       --border: #30363D;
       --border-strong: #484F58;
       --shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
@@ -98,7 +98,7 @@
     letter-spacing: 0.12em; text-transform: uppercase;
   }
   h1 {
-    font-family: var(--serif); font-weight: 500;
+    font-family: var(--sans); font-weight: 700;
     font-size: clamp(30px, 4vw, 40px); line-height: 1.12;
     letter-spacing: -0.02em; color: var(--heading); margin-bottom: 12px;
   }
@@ -134,7 +134,7 @@
     overflow-x: auto;
   }
   .section-title {
-    font-family: var(--serif); font-weight: 500;
+    font-family: var(--sans); font-weight: 600;
     font-size: 20px; color: var(--heading); margin-bottom: 16px;
   }
   .compare-table {
@@ -224,6 +224,14 @@
     .compare-section, .matrix-section { padding: 16px; }
     .verdict-box { flex-direction: column; align-items: flex-start; gap: 8px; }
   }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .topbar {
+      background: var(--bg-card);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
 </style>
 </head>
 <body>
@@ -233,9 +241,7 @@
       <span class="pill compare-tag">Comparison</span>
       <span class="pill">{OPTION_A_NAME} vs {OPTION_B_NAME}</span>
     </div>
-    <div class="topbar-right">
-      <span class="pill">Light-first</span>
-    </div>
+    
   </div>
 
   <header class="report-header">

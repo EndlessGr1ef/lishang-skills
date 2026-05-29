@@ -20,8 +20,8 @@
     --shadow: 0 10px 30px rgba(20, 20, 19, 0.05);
     --radius: 16px;
     --radius-sm: 12px;
-    --serif: Georgia, 'Times New Roman', serif;
-    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    
+    --sans: "Noto Sans SC", "Source Han Sans SC", system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --mono: ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace;
     --green-bg: #E8F5EC;
     --green-text: #1A7F37;
@@ -40,8 +40,8 @@
       --text: #E6EDF3;
       --text-muted: #8B949E;
       --heading: #F0F6FC;
-      --accent: #58A6FF;
-      --accent-soft: #1F2A37;
+      --accent: #E89B6C;
+      --accent-soft: #2A1E15;
       --border: #30363D;
       --border-strong: #484F58;
       --code-bg: #1C2128;
@@ -116,7 +116,7 @@
     letter-spacing: 0.12em; text-transform: uppercase;
   }
   h1 {
-    font-family: var(--serif); font-weight: 500;
+    font-family: var(--sans); font-weight: 700;
     font-size: clamp(30px, 4vw, 40px); line-height: 1.12;
     letter-spacing: -0.02em; color: var(--heading); margin-bottom: 12px;
   }
@@ -165,7 +165,7 @@
     margin: 24px 0;
   }
   .chart-title {
-    font-family: var(--serif); font-weight: 500;
+    font-family: var(--sans); font-weight: 600;
     font-size: 20px; color: var(--heading); margin-bottom: 16px;
   }
   .chart-row {
@@ -242,6 +242,14 @@
     .kpi-strip { grid-template-columns: 1fr; }
     .chart-row { grid-template-columns: 1fr; }
   }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .topbar {
+      background: var(--bg-card);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 </head>
@@ -254,7 +262,6 @@
     </div>
     <div class="topbar-right">
       <span class="pill">Chart.js v4</span>
-      <span class="pill">Light-first</span>
     </div>
   </div>
 
@@ -265,7 +272,6 @@
       <span>{DATE}</span>
       <span>·</span>
       <span>{TIME_RANGE}</span>
-      <span>·</span>
       <span>Source: {DATA_SOURCE}</span>
     </div>
   </header>
@@ -396,7 +402,7 @@
       datasets: [{
         label: '{DATASET_NAME}',
         data: [Number('{VALUE_A}') || 0, Number('{VALUE_B}') || 0, Number('{VALUE_C}') || 0],
-        backgroundColor: ['#D97757', '#58A6FF', '#7EE787'],
+        backgroundColor: isDark ? ['#E89B6C', '#79C0FF', '#7EE787'] : ['#D97757', '#58A6FF', '#7EE787'],
         borderRadius: 6
       }]
     },
@@ -410,8 +416,8 @@
       datasets: [{
         label: '{TREND_NAME}',
         data: [Number('{TREND_1}') || 0, Number('{TREND_2}') || 0, Number('{TREND_3}') || 0, Number('{TREND_4}') || 0],
-        borderColor: '#D97757',
-        backgroundColor: 'rgba(217, 119, 87, 0.12)',
+        borderColor: isDark ? '#E89B6C' : '#D97757',
+        backgroundColor: isDark ? 'rgba(232, 155, 108, 0.12)' : 'rgba(217, 119, 87, 0.12)',
         fill: true,
         tension: 0.3,
         pointRadius: 4

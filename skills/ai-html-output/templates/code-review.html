@@ -20,8 +20,8 @@
     --shadow: 0 10px 30px rgba(20, 20, 19, 0.05);
     --radius: 16px;
     --radius-sm: 12px;
-    --serif: Georgia, 'Times New Roman', serif;
-    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    
+    --sans: "Noto Sans SC", "Source Han Sans SC", system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --mono: ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace;
     --green-bg: #E8F5EC;
     --green-text: #1A7F37;
@@ -40,8 +40,8 @@
       --text: #E6EDF3;
       --text-muted: #8B949E;
       --heading: #F0F6FC;
-      --accent: #58A6FF;
-      --accent-soft: #1F2A37;
+      --accent: #E89B6C;
+      --accent-soft: #2A1E15;
       --border: #30363D;
       --border-strong: #484F58;
       --code-bg: #1C2128;
@@ -103,7 +103,7 @@
     letter-spacing: 0.12em; text-transform: uppercase;
   }
   h1 {
-    font-family: var(--serif); font-weight: 500;
+    font-family: var(--sans); font-weight: 700;
     font-size: clamp(30px, 4vw, 40px); line-height: 1.12;
     letter-spacing: -0.02em; color: var(--heading); margin-bottom: 12px;
   }
@@ -197,7 +197,7 @@
     box-shadow: var(--shadow); margin: 24px 0;
   }
   .risk-title {
-    font-family: var(--serif); font-weight: 500;
+    font-family: var(--sans); font-weight: 600;
     font-size: 20px; color: var(--heading); margin-bottom: 16px;
   }
   .risk-matrix {
@@ -263,6 +263,14 @@
     .file-header { flex-direction: column; align-items: flex-start; }
     .risk-matrix { grid-template-columns: auto repeat(2, 1fr); }
   }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .topbar {
+      background: var(--bg-card);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
 </style>
 </head>
 <body>
@@ -274,7 +282,6 @@
     </div>
     <div class="topbar-right">
       <span class="pill status-{PR_STATUS}">{PR_STATUS}</span>
-      <span class="pill">Light-first</span>
     </div>
   </div>
 
@@ -285,7 +292,8 @@
       <span>Author: {AUTHOR}</span>
       <span>·</span>
       <span>{DATE}</span>
-      <span>·</span>
+    </div>
+    <div class="meta-row">
       <span>{BRANCH}</span>
       <span>·</span>
       <span>{COMMITS} commits</span>

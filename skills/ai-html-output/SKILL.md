@@ -105,7 +105,7 @@ The templates support two primary visualization tools:
 
 ## Mermaid diagrams in HTML
 
-The template includes [Mermaid](https://mermaid.js.org) loaded from CDN (`https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs`, ~3.3MB, browser-cached across pages). Use `<pre class="mermaid">` to render diagrams directly in HTML:
+The template includes [Mermaid](https://mermaid.js.org) loaded from CDN (`https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs`, ~3.3MB, browser-cached across pages) plus [mermaid-enhancements](https://www.npmjs.com/package/@mostlylucid/mermaid-enhancements) for interactive zoom/pan, fullscreen lightbox, and PNG/SVG export. Use `<pre class="mermaid">` or `<div class="mermaid">` to render diagrams:
 
 ```html
 <pre class="mermaid">
@@ -115,6 +115,21 @@ graph LR
   B -->|No| D[End]
 </pre>
 ```
+
+### Interactive features (via mermaid-enhancements)
+
+Every rendered diagram automatically gets a toolbar with:
+
+| Feature | Description |
+|---------|-------------|
+| **Zoom in/out** | Mouse wheel or toolbar buttons — solves the "complex diagram too small to read" problem |
+| **Pan** | Drag to pan around large diagrams; toggle pan mode via toolbar |
+| **Reset zoom** | One-click return to fit-to-view |
+| **Fullscreen lightbox** | Opens diagram in an immersive overlay for maximum readability |
+| **Export PNG** | Downloads at 2x pixel ratio |
+| **Export SVG** | Downloads raw SVG for editing |
+
+Touch support: pinch-to-zoom and swipe-to-pan work on mobile/tablet.
 
 ### When to use Mermaid
 
@@ -127,13 +142,35 @@ Prefer Mermaid over ASCII art, text descriptions, or static SVG mockups.
 
 ### Theme adaptation
 
-The template auto-detects `prefers-color-scheme` and sets Mermaid's theme to `default` (light) or `dark` accordingly. On OS-level theme change, the page reloads to re-render diagrams.
+The template auto-detects `prefers-color-scheme` and sets Mermaid's theme to `default` (light) or `dark` accordingly. On OS-level theme change, the page reloads to re-render diagrams. The enhancement toolbar also adapts to the active theme via CSS custom properties.
+
+### Node click interactions
+
+For diagrams that need click-to-navigate or click-to-expand behavior, `securityLevel` is set to `'loose'` by default in the templates. Use Mermaid's built-in `click` directive:
+
+```
+graph TD
+  A[Service A] --> B[Service B]
+  click A "/details/service-a" "View Service A details"
+  click B callback "Click for details"
+```
+
+The `callback` function must be defined in a `<script>` block on the page. This works alongside the zoom/pan toolbar — clicks on nodes trigger the callback, while clicks on empty space allow panning.
+
+### Technical notes
+
+The initialization uses a two-step approach:
+
+1. **Mermaid renders SVGs** — `mermaid.initialize()` + `mermaid.run()` renders all `.mermaid` elements
+2. **Enhancement wraps SVGs** — `enhanceMermaidDiagrams()` adds zoom/pan toolbar, fullscreen lightbox, and export buttons
+
+This is necessary because `@mostlylucid/mermaid-enhancements` bundles its own dependencies (svg-pan-zoom, html-to-image) but does not bundle mermaid itself. The ESM module scope means `init()` cannot access a separately-imported mermaid instance, so we render first and enhance after.
 
 ### Limitations
 
-- **CDN dependency**: Mermaid JS (~3.3MB) is loaded from jsDelivr at first open. Subsequent HTML files sharing the same CDN URL reuse the browser cache.
-- **`securityLevel: strict`** is the default — click/hover interactions on diagram nodes are disabled. Change to `"loose"` if user-trusted diagrams need interactivity.
-- **Dynamic content**: If diagram definitions are inserted via `innerHTML` after page load, call `await mermaid.run()` manually instead of relying on `startOnLoad`.
+- **CDN dependency**: Mermaid JS (~3.3MB) + mermaid-enhancements (~51KB) are loaded from CDN at first open. Subsequent HTML files sharing the same CDN URLs reuse the browser cache.
+- **No node collapse/expand**: mermaid-enhancements provides zoom/pan/fullscreen but does not support collapsing subgraphs or folding node groups. For that level of interaction, consider Path B (custom svg-pan-zoom + DOM manipulation) or a different diagram engine.
+- **Dynamic content**: If diagram definitions are inserted via `innerHTML` after page load, call `await init()` again or call `enhanceMermaidDiagrams()` separately.
 - Not suitable for very short replies or pure-code outputs — only use Mermaid when a diagram genuinely improves understanding.
 
 ## Chart.js in HTML

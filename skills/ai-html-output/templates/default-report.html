@@ -20,8 +20,8 @@
     --shadow: 0 10px 30px rgba(20, 20, 19, 0.05);
     --radius: 16px;
     --radius-sm: 12px;
-    --serif: Georgia, 'Times New Roman', serif;
-    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    
+    --sans: "Noto Sans SC", "Source Han Sans SC", system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --mono: ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace;
     --green-bg: #E8F5EC;
     --green-text: #1A7F37;
@@ -40,8 +40,8 @@
       --text: #E6EDF3;
       --text-muted: #8B949E;
       --heading: #F0F6FC;
-      --accent: #58A6FF;
-      --accent-soft: #1F2A37;
+      --accent: #E89B6C;
+      --accent-soft: #2A1E15;
       --border: #30363D;
       --border-strong: #484F58;
       --code-bg: #1C2128;
@@ -138,14 +138,14 @@
     margin-bottom: 12px;
     color: var(--accent);
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 
   h1 {
-    font-family: var(--serif);
-    font-weight: 500;
+    font-family: var(--sans);
+    font-weight: 700;
     font-size: clamp(30px, 4vw, 40px);
     line-height: 1.12;
     letter-spacing: -0.02em;
@@ -220,12 +220,12 @@
   .section-anchor { scroll-margin-top: 84px; }
 
   h2 {
-    font-family: var(--serif);
+    font-family: var(--sans);
     font-weight: 500;
-    font-size: 25px;
+    font-size: 24px;
     line-height: 1.22;
     color: var(--heading);
-    margin: 34px 0 12px;
+    margin: 32px 0 12px;
     letter-spacing: -0.01em;
   }
 
@@ -252,13 +252,13 @@
     margin: 0 0 16px 1.25rem;
     padding: 0;
   }
-  li { margin: 6px 0; }
+  li { margin: 8px 0; }
   strong { color: var(--heading); }
   a { color: var(--accent); }
   hr {
     border: 0;
     border-top: 1px solid var(--border);
-    margin: 28px 0;
+    margin: 32px 0;
   }
   blockquote {
     margin: 16px 0;
@@ -336,7 +336,7 @@
 
   .metric-label {
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
@@ -390,7 +390,7 @@
     gap: 6px;
     font-family: var(--mono);
     font-size: 11px;
-    padding: 3px 9px;
+    padding: 4px 8px;
     border-radius: 999px;
     border: 1px solid transparent;
     background: var(--accent-soft);
@@ -425,8 +425,8 @@
     font-family: var(--mono);
     font-size: 13px;
     background: var(--code-bg);
-    padding: 2px 6px;
-    border-radius: 5px;
+    padding: 2px 8px;
+    border-radius: 4px;
   }
 
   pre {
@@ -442,7 +442,7 @@
   pre code {
     background: none;
     padding: 0;
-    font-size: 12.5px;
+    font-size: 12px;
     line-height: 1.65;
   }
 
@@ -542,20 +542,53 @@
     justify-content: center;
     overflow-x: auto;
   }
+  /* Mermaid enhancements toolbar theming */
+  .mermaid-controls {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    box-shadow: var(--shadow) !important;
+  }
+  .mermaid-control-btn {
+    color: var(--text) !important;
+  }
+  .mermaid-control-btn:hover {
+    background: var(--bg-soft) !important;
+    color: var(--accent) !important;
+  }
+  .mermaid-lightbox {
+    background: var(--bg) !important;
+  }
 
   @media (max-width: 520px) {
     h1 { font-size: 28px; }
     h2 { font-size: 22px; }
     .meta-row { gap: 8px; }
   }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .topbar {
+      background: var(--bg-card);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
 </style>
+<!-- Mermaid enhancements: zoom/pan, fullscreen lightbox, PNG/SVG export -->
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@mostlylucid/mermaid-enhancements@1.0.0/src/styles.css">
 <script type="module">
-  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-  mermaid.initialize({
+  const mermaidModule = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+  const mermaid = mermaidModule.default;
+  window.mermaid = mermaid;
+  await mermaid.initialize({
     startOnLoad: true,
     theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default',
-    securityLevel: 'strict',
+    securityLevel: 'loose',
   });
+  await mermaid.run();
+  const { enhanceMermaidDiagrams } = await import('https://unpkg.com/@mostlylucid/mermaid-enhancements@1.0.0/dist/index.bundle.min.js');
+  await enhanceMermaidDiagrams();
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => location.reload());
 </script>
 </head>
@@ -569,7 +602,6 @@
       </div>
       <div class="topbar-right">
         <span class="pill">Open in browser</span>
-        <span class="pill">Light-first</span>
       </div>
     </div>
 
@@ -579,9 +611,7 @@
       <div class="meta-row">
         <span>{DATE}</span>
         <span>·</span>
-        <span>Generated by AI</span>
-        <span>·</span>
-        <span>Designed for scanability</span>
+        <span>AI-generated artifact</span>
       </div>
     </header>
 
