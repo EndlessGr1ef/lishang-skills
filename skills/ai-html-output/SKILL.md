@@ -1,7 +1,7 @@
 ---
 name: ai-html-output
-description: Use HTML instead of Markdown as an AI output format for reports, code reviews, technical plans, research summaries, status updates, and similar deliverables. Includes Mermaid diagram support via CDN. Derived from Thariq Shihipar's "The Unreasonable Effectiveness of HTML" post and examples. Includes a source-faithful summary, practical trigger scenarios, a template skeleton, and color-theme conventions.
-version: 2.0.0
+description: Use HTML instead of Markdown as an AI output format for reports, code reviews, technical plans, research summaries, status updates, and similar deliverables. Includes Mermaid diagram support via CDN, interactive zoom/pan, diagram density rules, and a template skeleton with light/dark theme conventions.
+version: 2.1.0
 ---
 
 # AI HTML Output
@@ -10,44 +10,43 @@ Use HTML instead of Markdown when AI output needs to be interactive, navigable, 
 
 > **Core philosophy**: HTML is not just "fancy Markdown". It is a medium for laying out information in space. Markdown is often better for editing; HTML is often better for reading.
 
-## Background
+## Why HTML
 
-Derived from Thariq Shihipar's post *"Using Claude Code: The Unreasonable Effectiveness of HTML"* (May 2026). Core idea: HTML is a medium for laying out information in space — richer than Markdown for reading, though not always better for editing.
+HTML output trades generation speed for reader experience:
 
-Key takeaways:
+- **Information density** — side-by-side columns, KPI strips, and grid layouts show more per viewport than linear Markdown
+- **Visual clarity** — color, spacing, typography, and diagrams make structure immediately apparent
+- **Interactivity** — collapsible sections, zoomable diagrams, tabbed views, and live controls let readers explore at their own pace
+- **Shareability** — a single self-contained `.html` file opens in any browser, no build step or renderer needed
 
-- HTML excels at information density, visual clarity, sharing, and two-way interaction
-- You often don't need a heavy `/html` skill — just ask for "an HTML file"
-- Tradeoffs: slower generation (~2-4x), noisy diffs, higher token usage
+The tradeoff: HTML takes longer to generate and uses more tokens than Markdown. Use it when the output benefits from layout, visuals, or interaction — not as a default.
 
-For the full source summary, see `references/thariq-original-claims.md`.
+## When to Use HTML
 
-## Practical guidance derived from the post
+| Scenario | Why HTML wins |
+|----------|--------------|
+| Code reviews / PR summaries | Diff comparison, severity markers, jump links, review guidance |
+| Technical proposals / implementation plans | Timelines, data-flow diagrams, risk tables, mockups |
+| Knowledge explanations / research summaries | TL;DR boxes, collapsible steps, annotated snippets, diagrams |
+| Status reports / weekly updates | Shipped/slipped work, charts, skim-friendly layout |
+| Comparative analysis | Side-by-side option comparison with trade-off annotations |
+| Interactive tuning artifacts | Sliders, knobs, previews, or copy-back controls for prompts, configs, or designs |
+| Structured editing interfaces | Triage boards, feature-flag editors, dataset curation views, or approval tools |
+| Data visualization / charting | Chart.js + KPI cards + tables |
+| Architecture / system explanations | Mermaid diagrams + annotated component tables |
 
-The sections below are **operational guidance inspired by Thariq's post**, not a claim that every line is his exact wording.
-
-### Good trigger scenarios for HTML
-
-- **Code reviews / PR summaries** — diff comparison, severity markers, jump links, and review guidance
-- **Technical proposals / implementation plans** — timelines, data-flow diagrams, risk tables, and mockups
-- **Knowledge explanations / research summaries** — TL;DR boxes, collapsible steps, annotated snippets, and diagrams
-- **Status reports / weekly updates** — shipped/slipped work, charts, and skim-friendly layout
-- **Comparative analysis** — side-by-side option comparison with trade-off annotations
-- **Interactive tuning artifacts** — sliders, knobs, previews, or copy-back controls for prompts, configs, or designs
-- **Structured editing interfaces** — triage boards, feature-flag editors, dataset curation views, or approval tools
-
-### Cases where Markdown may still be better
-
-This is practical guidance, not a direct quote from Thariq.
+## When NOT to Use HTML
 
 - **Short messages / simple answers** — two or three sentences do not need extra structure
 - **Plain code snippets** — when the code stands on its own without explanation
 - **User explicitly requests Markdown** — for editing, copying, or pasting into a wiki
 - **Version-controlled working docs** — Markdown diffs are often cleaner and easier to review
-- **Quick iteration** — HTML often takes longer to generate than Markdown
+- **Quick iteration** — HTML takes longer to generate than Markdown
 - **Platform-native sharing** — some social platforms and chat tools render Markdown natively but strip or mangle HTML
 
-## File output convention
+## Quick Start
+
+### File output convention
 
 When generating an HTML artifact as a file, save it to an `html/` folder in the current working directory:
 
@@ -57,16 +56,15 @@ When generating an HTML artifact as a file, save it to an `html/` folder in the 
 
 If the `html/` directory does not exist, create it. This keeps generated artifacts organized and separate from source files.
 
-## Template skeleton
+### Template skeleton
 
 The following is a general-purpose HTML output template that works for many scenarios. Key traits:
 
 1. Single-file and self-contained with inline CSS
-2. **Light theme by default**; Thariq's examples are predominantly light themed
-3. Automatic dark-mode support through `prefers-color-scheme`; dark mode is not forced by default
-4. No build-time dependencies; opens directly in a browser (Mermaid is loaded from CDN at runtime)
-5. Support for collapsible sections, inline code highlighting, tables, and SVG charts
-6. Built-in [Mermaid](https://mermaid.js.org) diagram rendering via CDN import
+2. **Light theme by default** with automatic dark-mode support through `prefers-color-scheme`
+3. No build-time dependencies; opens directly in a browser (Mermaid is loaded from CDN at runtime)
+4. Support for collapsible sections, inline code highlighting, tables, and SVG charts
+5. Built-in [Mermaid](https://mermaid.js.org) diagram rendering via CDN import
 
 Use `templates/default-report.html` as a starting point for copy-and-modify workflows.
 
@@ -79,11 +77,9 @@ Use `templates/default-report.html` as a starting point for copy-and-modify work
 | `{DATE}` | Display date in the header meta row | "May 15, 2026" |
 | `{CONTENT}` | The entire main body — HTML content that replaces this placeholder inside `<main class="content">` | Full sections, tables, diagrams, etc. |
 
-### Important color guidance
+### Color scheme
 
-> **Important**: Thariq's example set is visually dominated by **light themes**: ivory `#FAF9F5` background plus dark gray `#141413` text. The common "dark by default" aesthetic in AI and developer-tool ecosystems is a broader developer-culture convention, **not the main visual takeaway of his examples**.
-
-This skill defaults to a light theme and adapts to dark mode through `@media (prefers-color-scheme: dark)`.
+Light theme is the default. Dark mode adapts automatically via `@media (prefers-color-scheme: dark)`.
 
 | Role | Light default | Dark adaptive |
 |------|---------------|---------------|
@@ -94,7 +90,21 @@ This skill defaults to a light theme and adapts to dark mode through `@media (pr
 | Accent | `#D97757` warm terracotta | `#58A6FF` blue |
 | Border | `#D1CFC5` | `#30363D` |
 
-## Data visualization
+## Data Visualization
+
+**Diagram density rule**: HTML output is for human eyes — it must be visually rich. Every HTML artifact should contain **at least 1 diagram per major section** (Mermaid or Chart.js). If a section has 3+ paragraphs of prose describing a process, architecture, data flow, comparison, or sequence, it almost certainly needs a diagram. Common patterns that demand diagrams:
+
+| Prose pattern | Diagram type | Example |
+|--------------|-------------|---------|
+| "X calls Y, then Y calls Z…" | Mermaid sequence diagram | Service call chain |
+| "The flow goes from A to B to C…" | Mermaid flowchart | Pipeline / workflow |
+| "There are N phases/stages…" | Mermaid flowchart or state diagram | Phase overview |
+| "X consists of these components…" | Mermaid flowchart or C4 diagram | Architecture overview |
+| "Compared to the old system…" | Mermaid flowchart (before/after) or comparison table | Migration diff |
+| "The formula / algorithm works as…" | Mermaid flowchart for logic + formula box for math | Computation pipeline |
+| "Numbers increased / decreased…" | Chart.js line or bar chart | Trends, metrics |
+| "Breakdown by category…" | Chart.js pie / doughnut / bar | Distribution |
+| "X has these dimensions…" | Chart.js radar | Multi-axis comparison |
 
 **Visual-first principle**: HTML is for human consumption. When information can be expressed visually — flows, relationships, sequences, hierarchies, trends, proportions — always prefer charts and diagrams over paragraphs. A single visual often carries more meaning and is faster to parse than several paragraphs of text. Default to visual structures for architecture, processes, comparisons, and data distributions; use text only for what cannot be shown visually.
 
@@ -103,9 +113,9 @@ The templates support two primary visualization tools:
 - **Mermaid** — flowcharts, sequence diagrams, state diagrams, Gantt charts, and more
 - **Chart.js** — bar charts, line charts, pie charts, radar charts, and data-driven graphics
 
-## Mermaid diagrams in HTML
+### Mermaid diagrams
 
-The template includes [Mermaid](https://mermaid.js.org) loaded from CDN (`https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs`, ~3.3MB, browser-cached across pages) plus [mermaid-enhancements](https://www.npmjs.com/package/@mostlylucid/mermaid-enhancements) for interactive zoom/pan, fullscreen lightbox, and PNG/SVG export. Use `<pre class="mermaid">` or `<div class="mermaid">` to render diagrams:
+The template includes [Mermaid](https://mermaid.js.org) loaded from CDN (`https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs`, ~3.3MB, browser-cached across pages) plus [mermaid-enhancements](https://www.npmjs.com/package/@mostlylucid/mermaid-enhancements) for interactive zoom/pan and fullscreen lightbox. Export buttons and mouse-wheel zoom are intentionally disabled — use toolbar +/- buttons to zoom. Use `<pre class="mermaid">` or `<div class="mermaid">` to render diagrams:
 
 ```html
 <pre class="mermaid">
@@ -116,22 +126,20 @@ graph LR
 </pre>
 ```
 
-### Interactive features (via mermaid-enhancements)
+#### Interactive features (via mermaid-enhancements)
 
 Every rendered diagram automatically gets a toolbar with:
 
 | Feature | Description |
 |---------|-------------|
-| **Zoom in/out** | Mouse wheel or toolbar buttons — solves the "complex diagram too small to read" problem |
+| **Zoom in/out** | Toolbar +/− buttons only — mouse-wheel zoom is disabled so page scrolling works naturally when hovering over diagrams |
 | **Pan** | Drag to pan around large diagrams; toggle pan mode via toolbar |
 | **Reset zoom** | One-click return to fit-to-view |
 | **Fullscreen lightbox** | Opens diagram in an immersive overlay for maximum readability |
-| **Export PNG** | Downloads at 2x pixel ratio |
-| **Export SVG** | Downloads raw SVG for editing |
 
-Touch support: pinch-to-zoom and swipe-to-pan work on mobile/tablet.
+Export (PNG/SVG) buttons are disabled by default. Touch support: pinch-to-zoom and swipe-to-pan work on mobile/tablet.
 
-### When to use Mermaid
+#### When to use Mermaid
 
 - **Flowcharts**, **sequence diagrams**, **state diagrams**, **class diagrams** — any structural/behavioral visualization
 - **Gantt charts**, **pie charts**, **timelines** — quantitative or temporal data
@@ -140,11 +148,11 @@ Touch support: pinch-to-zoom and swipe-to-pan work on mobile/tablet.
 
 Prefer Mermaid over ASCII art, text descriptions, or static SVG mockups.
 
-### Theme adaptation
+#### Theme adaptation
 
 The template auto-detects `prefers-color-scheme` and sets Mermaid's theme to `default` (light) or `dark` accordingly. On OS-level theme change, the page reloads to re-render diagrams. The enhancement toolbar also adapts to the active theme via CSS custom properties.
 
-### Node click interactions
+#### Node click interactions
 
 For diagrams that need click-to-navigate or click-to-expand behavior, `securityLevel` is set to `'loose'` by default in the templates. Use Mermaid's built-in `click` directive:
 
@@ -157,27 +165,30 @@ graph TD
 
 The `callback` function must be defined in a `<script>` block on the page. This works alongside the zoom/pan toolbar — clicks on nodes trigger the callback, while clicks on empty space allow panning.
 
-### Technical notes
+#### Technical notes
 
-The initialization uses a two-step approach:
+The initialization uses a three-step approach:
 
 1. **Mermaid renders SVGs** — `mermaid.initialize()` + `mermaid.run()` renders all `.mermaid` elements
-2. **Enhancement wraps SVGs** — `enhanceMermaidDiagrams()` adds zoom/pan toolbar, fullscreen lightbox, and export buttons
+2. **Enhancement wraps SVGs** — `configure({ controls: { export: false } })` disables export buttons, then `enhanceMermaidDiagrams()` adds zoom/pan toolbar and fullscreen lightbox
+3. **Wheel event interception** — a capture-phase `wheel` listener on `.mermaid-wrapper` elements calls `stopImmediatePropagation()` to prevent svg-pan-zoom from intercepting scroll, so normal page scrolling works when the cursor is over a diagram
 
 This is necessary because `@mostlylucid/mermaid-enhancements` bundles its own dependencies (svg-pan-zoom, html-to-image) but does not bundle mermaid itself. The ESM module scope means `init()` cannot access a separately-imported mermaid instance, so we render first and enhance after.
 
-### Limitations
+#### Limitations
 
 - **CDN dependency**: Mermaid JS (~3.3MB) + mermaid-enhancements (~51KB) are loaded from CDN at first open. Subsequent HTML files sharing the same CDN URLs reuse the browser cache.
 - **No node collapse/expand**: mermaid-enhancements provides zoom/pan/fullscreen but does not support collapsing subgraphs or folding node groups. For that level of interaction, consider Path B (custom svg-pan-zoom + DOM manipulation) or a different diagram engine.
-- **Dynamic content**: If diagram definitions are inserted via `innerHTML` after page load, call `await init()` again or call `enhanceMermaidDiagrams()` separately.
+- **Mouse-wheel zoom disabled by design**: The library ties mouse-wheel zoom to pan state with no independent toggle. A capture-phase `wheel` event interceptor prevents svg-pan-zoom from handling scroll, keeping normal page scroll behavior. Zoom is available only via toolbar +/− buttons.
+- **Export disabled by design**: PNG/SVG export buttons are removed via `configure({ controls: { export: false } })` to keep the toolbar minimal.
+- **Dynamic content**: If diagram definitions are inserted via `innerHTML` after page load, call `await init()` again or call `enhanceMermaidDiagrams()` separately. You must also re-attach the wheel event interceptor on any new `.mermaid-wrapper` elements.
 - Not suitable for very short replies or pure-code outputs — only use Mermaid when a diagram genuinely improves understanding.
 
-## Chart.js in HTML
+### Chart.js
 
 The `data-report.html` template uses [Chart.js](https://www.chartjs.org/) loaded from CDN (`https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js`).
 
-### Container height rule (critical)
+#### Container height rule (critical)
 
 Every `<canvas>` used by Chart.js **must** be wrapped in a container with an explicit height:
 
@@ -189,16 +200,16 @@ Every `<canvas>` used by Chart.js **must** be wrapped in a container with an exp
 
 Without explicit container height, Chart.js `responsive: true` triggers a ResizeObserver infinite loop that freezes the browser tab. This is a hard rule — no exceptions.
 
-### When to use Chart.js
+#### When to use Chart.js
 
 - **Bar charts** — category comparisons, rankings, volume distributions
 - **Line charts** — trends over time, metrics history
-- **Pie / doughnut charts** — proportional breakdowns, market share, composition
+- **Pie / doughnut charts** — proportional breakdown, market share, composition
 - **Radar charts** — multi-dimensional comparisons (framework scores, skill matrices)
 
 Prefer Chart.js over static images or ASCII charts for data reports.
 
-## Design constraints (all templates)
+## Design Constraints
 
 These constraints apply to every HTML output, regardless of which template is used:
 
@@ -211,6 +222,7 @@ These constraints apply to every HTML output, regardless of which template is us
 | 5 | **Must use real data** — No lorem ipsum, no placeholder text that doesn't come from user input | The whole point of HTML output is clarity of real information |
 | 6 | **Every interactive element has :focus state** — Buttons, links, and inputs must have visible focus indicators | Keyboard accessibility |
 | 7 | **No gratuitous 3D / shadow excess** — Avoid excessive box-shadows, perspective transforms, and bevels unless the specific template calls for them | Keeps output clean and professional |
+| 8 | **Page max-width ≥ 1280px when sidebar TOC is used** — Sidebar layouts (220px TOC + content) need more room: at 1080px the content column is only ~860px, which crushes wide tables and code blocks. Use `max-width: 1280px` on `.page` and add `overflow-x: auto` on `.content` at the sidebar breakpoint so tables scroll horizontally instead of wrapping | Long tables, code blocks, and Mermaid diagrams need horizontal breathing room |
 
 ### Self-critique checklist
 
@@ -223,36 +235,18 @@ Run this before finalizing any HTML output:
 5. Does every button/link/input have a visible `:focus` style?
 6. Is the output readable at 320px viewport width?
 7. Is the file self-contained (no external CSS files, all inline)?
+8. Does every major section have at least 1 diagram? If any section has 3+ paragraphs of process/flow/comparison prose without a diagram, add one.
 
-## Scenario decision table
-
-| User request | Output format | Reason |
-|--------------|---------------|--------|
-| "Explain this PR" | HTML | Benefits from visual diff explanation and annotations |
-| "Help me write a weekly report" | HTML | Benefits from charts, sections, and skim-friendly formatting |
-| "How does this code work?" | HTML | Benefits from diagrams, annotated snippets, and clearer structure |
-| "Compare A and B" | HTML | Side-by-side comparison is easier in HTML |
-| "What time is it?" | Markdown | Pure answer, no layout needed |
-| "How do I install X?" | HTML if long; Markdown if short | Depends on how much scaffolding the explanation needs |
-| "Tune this prompt/config/design" | HTML (interactive-tuner) | Interaction and live preview can help |
-| "Chart this data" / "Visualize this CSV" | HTML (data-report) | Chart.js + KPI cards + table |
-| "Turn this spreadsheet into a report" | HTML (data-report) | Structured data visualization |
-| "Post this to a chat platform" | Markdown | Native Markdown rendering is more reliable on most platforms |
-
-## Common pitfalls
+## Common Pitfalls
 
 - **Do not use HTML every time**: short answers are often better in Markdown.
-- **Do not over-attribute claims**: separate what the source explicitly says from your own derived guidance.
 - **Avoid excessive interactivity**: controls should serve a clear reading or editing purpose.
-- **Remember the tradeoffs**: HTML can be slower to generate and harder to diff in version control.
 - **Watch file size**: very long HTML is often worse than multiple files or a carefully collapsed single file.
-- **Do not force dark mode**: dark mode is not the default recommendation implied by Thariq's examples.
-- **Expect higher token usage**: HTML generation is typically 2-4x slower and uses significantly more tokens than Markdown (Thariq's own estimate). For frequent or batch artifact generation, this cost compounds.
+- **Do not force dark mode**: light theme is the default; dark mode adapts via `prefers-color-scheme`.
 - **Consider accessibility**: the default template looks polished but does not include focus-visible styles, skip-to-content links, ARIA landmarks, or `prefers-reduced-motion` adaptation. Add these when the output is intended for public or diverse audiences.
 
 ## References
 
-- `references/thariq-original-claims.md` — source-faithful summary of the original post, its sections, FAQ tradeoffs, and community discussion
 - `templates/default-report.html` — general report template with a light default theme and adaptive dark mode
 - `templates/data-report.html` — Chart.js-powered data visualization with KPI cards and insight blocks
 - `templates/code-review.html` — PR review template with diff display, severity markers, and risk matrix

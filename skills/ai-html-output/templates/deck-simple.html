@@ -252,7 +252,7 @@
   }
   
 </style>
-<!-- Mermaid enhancements: zoom/pan, fullscreen lightbox, PNG/SVG export -->
+<!-- Mermaid enhancements: zoom/pan, fullscreen lightbox (no export, no scroll-zoom) -->
 <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@mostlylucid/mermaid-enhancements@1.0.0/src/styles.css">
 <script type="module">
@@ -265,8 +265,17 @@
     securityLevel: 'loose',
   });
   await mermaid.run();
-  const { enhanceMermaidDiagrams } = await import('https://unpkg.com/@mostlylucid/mermaid-enhancements@1.0.0/dist/index.bundle.min.js');
+  const { enhanceMermaidDiagrams, configure } = await import('https://unpkg.com/@mostlylucid/mermaid-enhancements@1.0.0/dist/index.bundle.min.js');
+  configure({
+    controls: {
+      export: false,
+    }
+  });
   await enhanceMermaidDiagrams();
+  // Disable mouse-wheel zoom — zoom via toolbar +/- buttons only
+  document.querySelectorAll('.mermaid-wrapper').forEach(wrapper => {
+    wrapper.addEventListener('wheel', e => e.stopImmediatePropagation(), true);
+  });
 </script>
 </head>
 <body>
