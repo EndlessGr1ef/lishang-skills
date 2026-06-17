@@ -28,8 +28,9 @@ When this skill is used:
 1. Discover local skills.
 2. Generate one OpenCode command file per skill.
 3. Make each command explicitly load and apply its matching skill.
-4. Preserve existing command files unless the user asks to overwrite.
-5. Report created, skipped, and conflicting commands.
+4. Delete stale generated command files when the matching skill no longer exists.
+5. Preserve hand-written command files unless the user asks to overwrite.
+6. Report created, updated, deleted stale, skipped, and conflicting commands.
 
 ## Skill Search Paths
 
@@ -70,18 +71,21 @@ For a skill named `code-review`, generate:
 
 ```md
 ---
-description: Use the code-review skill directly
+description: Use the code-review skill: short description from SKILL.md
 ---
 
-Use the native OpenCode skill tool to load and apply the `code-review` skill before doing anything else.
+Apply the `code-review` skill.
 
-User task:
 $ARGUMENTS
-
-If the skill is unavailable, say that clearly and explain which skill name was attempted.
 ```
 
 If the skill has a useful frontmatter `description`, include a concise version in the command description.
+
+## Sync Rules
+
+- Delete stale generated commands by default when the matching skill no longer exists.
+- Never delete hand-written commands.
+- Stale deletion only applies to command files that match this skill's generated template.
 
 ## Collision Rules
 
@@ -117,6 +121,7 @@ Always summarize:
 ```text
 Created: N
 Updated: N
+Deleted stale: N
 Skipped existing: N
 Skipped conflicts: N
 Target: ~/.config/opencode/commands
