@@ -59,7 +59,7 @@ They are not alternatives; they are a **positioning × technique** partnership.
 
 ## Interaction Style: Tool-Driven Structured Inquiry
 
-Multi-turn interactive questioning. During the questioning phase, **prefer calling the system's built-in questioning tool** (such as `question` or equivalent interactive UI components), avoiding large blocks of plain-text rhetorical questions. If the questioning tool is unavailable, fall back to structured text output, preserving option formatting.
+Multi-turn interactive questioning. During Phase 1 and Phase 2, call the system's built-in questioning tool (such as `question` or equivalent interactive UI components) for every key question. Do not replace tool calls with large blocks of plain-text rhetorical questions. Use structured text output only when the questioning tool is unavailable, and preserve the same question + options format.
 
 ### Question Tool Content Construction
 
@@ -164,7 +164,7 @@ If you [condition 2] → Path B
 
 ## Rules
 
-1. **Consultant tone constraint:** Options should feel natural and conversational, like exploring different scenario possibilities together with the user, not like a cold multiple-choice quiz. Before calling the questioning tool, first output 1–2 sentences showing your understanding of the current situation, so options feel like they naturally grow from that understanding rather than appearing out of nowhere.
+1. **Question tool first:** In Phase 1 and Phase 2, every round must include exactly one `question` tool call unless the tool is unavailable. Before calling the questioning tool, first output 1–2 sentences showing your understanding of the current situation, so the options naturally follow from the analysis rather than appearing out of nowhere.
 
 2. **One key question per round:** Strictly follow the "question tool content construction" format for options (2–4 items, specific scenario assumptions, recommendation marks, fallback option). Each option reveals an assumption rather than directly giving an answer — the user discovers their true inclination by choosing assumptions.
 
