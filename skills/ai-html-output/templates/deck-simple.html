@@ -238,6 +238,17 @@
   .mermaid-lightbox {
     background: var(--bg) !important;
   }
+  /* Fullscreen lightbox — fill entire viewport, not just 91%×83% */
+  .mermaid-lightbox-content {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+  .mermaid-lightbox-diagram-wrapper {
+    padding: 1rem !important;
+  }
 
   @media (max-width: 640px) {
     .slide { padding: 60px 24px 80px; }
@@ -272,10 +283,18 @@
     }
   });
   await enhanceMermaidDiagrams();
-  // Disable mouse-wheel zoom — zoom via toolbar +/- buttons only
-  document.querySelectorAll('.mermaid-wrapper').forEach(wrapper => {
-    wrapper.addEventListener('wheel', e => e.stopImmediatePropagation(), true);
-  });
+  // Disable mouse-wheel AND trackpad zoom — zoom via toolbar +/- buttons only
+  // Delegated capture listener covers both inline .mermaid-wrapper and dynamic .mermaid-lightbox-diagram-wrapper
+  const blockZoom = e => {
+    if (e.target.closest('.mermaid-wrapper, .mermaid-lightbox-diagram-wrapper')) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  };
+  document.addEventListener('wheel', blockZoom, { passive: false, capture: true });
+  document.addEventListener('gesturestart', blockZoom, true);
+  document.addEventListener('gesturechange', blockZoom, true);
+  document.addEventListener('gestureend', blockZoom, true);
 </script>
 </head>
 <body>

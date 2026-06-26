@@ -115,7 +115,7 @@ The templates support two primary visualization tools:
 
 ### Mermaid diagrams
 
-The template includes [Mermaid](https://mermaid.js.org) loaded from CDN (`https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs`, ~3.3MB, browser-cached across pages) plus [mermaid-enhancements](https://www.npmjs.com/package/@mostlylucid/mermaid-enhancements) for interactive zoom/pan and fullscreen lightbox. Export buttons and mouse-wheel zoom are intentionally disabled — use toolbar +/- buttons to zoom. Use `<pre class="mermaid">` or `<div class="mermaid">` to render diagrams:
+The template includes [Mermaid](https://mermaid.js.org) loaded from CDN (`https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs`, ~3.3MB, browser-cached across pages) plus [mermaid-enhancements](https://www.npmjs.com/package/@mostlylucid/mermaid-enhancements) for interactive zoom/pan and fullscreen lightbox. Export buttons and both mouse-wheel and trackpad pinch-zoom are intentionally disabled — use toolbar +/- buttons to zoom. Use `<pre class="mermaid">` or `<div class="mermaid">` to render diagrams:
 
 ```html
 <pre class="mermaid">
@@ -132,10 +132,10 @@ Every rendered diagram automatically gets a toolbar with:
 
 | Feature | Description |
 |---------|-------------|
-| **Zoom in/out** | Toolbar +/− buttons only — mouse-wheel zoom is disabled so page scrolling works naturally when hovering over diagrams |
+| **Zoom in/out** | Toolbar +/− buttons only — mouse-wheel and trackpad pinch-zoom are disabled so page scrolling works naturally when hovering over diagrams |
 | **Pan** | Drag to pan around large diagrams; toggle pan mode via toolbar |
 | **Reset zoom** | One-click return to fit-to-view |
-| **Fullscreen lightbox** | Opens diagram in an immersive overlay for maximum readability |
+| **Fullscreen lightbox** | Opens diagram in an immersive overlay that fills the entire viewport for maximum readability |
 
 Export (PNG/SVG) buttons are disabled by default. Touch support: pinch-to-zoom and swipe-to-pan work on mobile/tablet.
 
@@ -171,7 +171,7 @@ The initialization uses a three-step approach:
 
 1. **Mermaid renders SVGs** — `mermaid.initialize()` + `mermaid.run()` renders all `.mermaid` elements
 2. **Enhancement wraps SVGs** — `configure({ controls: { export: false } })` disables export buttons, then `enhanceMermaidDiagrams()` adds zoom/pan toolbar and fullscreen lightbox
-3. **Wheel event interception** — a capture-phase `wheel` listener on `.mermaid-wrapper` elements calls `stopImmediatePropagation()` to prevent svg-pan-zoom from intercepting scroll, so normal page scrolling works when the cursor is over a diagram
+3. **Wheel/gesture event interception** — a delegated capture-phase listener on `document` checks if the event target is inside `.mermaid-wrapper` or `.mermaid-lightbox-diagram-wrapper` and calls `preventDefault()` + `stopImmediatePropagation()` for `wheel` (mouse scroll + Chrome trackpad pinch via `ctrl+wheel`) and `gesturestart/change/end` (Safari trackpad pinch). This blocks svg-pan-zoom from handling scroll/pinch while keeping normal page scroll behavior elsewhere.
 
 This is necessary because `@mostlylucid/mermaid-enhancements` bundles its own dependencies (svg-pan-zoom, html-to-image) but does not bundle mermaid itself. The ESM module scope means `init()` cannot access a separately-imported mermaid instance, so we render first and enhance after.
 
@@ -179,7 +179,7 @@ This is necessary because `@mostlylucid/mermaid-enhancements` bundles its own de
 
 - **CDN dependency**: Mermaid JS (~3.3MB) + mermaid-enhancements (~51KB) are loaded from CDN at first open. Subsequent HTML files sharing the same CDN URLs reuse the browser cache.
 - **No node collapse/expand**: mermaid-enhancements provides zoom/pan/fullscreen but does not support collapsing subgraphs or folding node groups. For that level of interaction, consider Path B (custom svg-pan-zoom + DOM manipulation) or a different diagram engine.
-- **Mouse-wheel zoom disabled by design**: The library ties mouse-wheel zoom to pan state with no independent toggle. A capture-phase `wheel` event interceptor prevents svg-pan-zoom from handling scroll, keeping normal page scroll behavior. Zoom is available only via toolbar +/− buttons.
+- **Mouse-wheel and trackpad zoom disabled by design**: The library ties mouse-wheel zoom to pan state with no independent toggle. A delegated capture-phase `wheel` listener (with `preventDefault` + `stopImmediatePropagation`) plus `gesturestart/change/end` listeners block both mouse scroll and trackpad pinch-zoom (Safari gesture events and Chrome's `ctrl+wheel` pinch) inside `.mermaid-wrapper` and `.mermaid-lightbox-diagram-wrapper`, keeping normal page scroll behavior. Zoom is available only via toolbar +/− buttons.
 - **Export disabled by design**: PNG/SVG export buttons are removed via `configure({ controls: { export: false } })` to keep the toolbar minimal.
 - **Dynamic content**: If diagram definitions are inserted via `innerHTML` after page load, call `await init()` again or call `enhanceMermaidDiagrams()` separately. You must also re-attach the wheel event interceptor on any new `.mermaid-wrapper` elements.
 - Not suitable for very short replies or pure-code outputs — only use Mermaid when a diagram genuinely improves understanding.
