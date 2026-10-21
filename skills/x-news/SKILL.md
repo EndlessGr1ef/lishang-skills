@@ -1,12 +1,13 @@
 ---
-name: twitter-insight-browse
-description: 通过 opencli 复用浏览器登录态，默认自动拉取 Twitter/X 最新推文时间线（For You + Following），也支持特定话题搜索和讨论线程深挖，并汇总成结构化热点报告。用户只说"用 twitter-insight-browse"、"查 Twitter"、"拉最新"、"看看 X"等未指定话题的模糊请求时，直接执行最新推文扫描，不要只回复技能已加载。热门趋势（Trending）为可选内容，仅在用户明确要求时拉取。当用户说"查查 Twitter 最新帖子"、"拉取下最新推文"、"看看 X 上有啥热点"、"Twitter 上关于 XXX 的讨论"、"去 Twitter 上查一下"、"最新 tweet"等触发。也适用于需要深入了解某个在 Twitter 上发酵的技术/产品话题。
+name: x-news
+description: 通过 opencli 复用浏览器登录态，默认自动拉取 Twitter/X 最新推文时间线（For You + Following），也支持特定话题搜索和讨论线程深挖，并统一用 answer-me-with-html 生成单页 HTML 报告。用户只说"用 x-news"、"查 Twitter"、"拉最新"、"看看 X"等未指定话题的模糊请求时，直接执行最新推文扫描，不要只回复技能已加载。热门趋势（Trending）为可选内容，仅在用户明确要求时拉取。当用户说"查查 Twitter 最新帖子"、"拉取下最新推文"、"看看 X 上有啥热点"、"Twitter 上关于 XXX 的讨论"、"去 Twitter 上查一下"、"最新 tweet"等触发。也适用于需要深入了解某个在 Twitter 上发酵的技术/产品话题。
 ---
 
-# Twitter/X 热点洞察浏览
+# X 热点洞察（x-news）
 
 ## Goal
-快速获取 Twitter/X 上的最新个性化推荐、热门趋势和特定话题讨论，以结构化报告形式呈现关键信息和社区观点。
+
+拉取 Twitter/X 的最新推荐、关注流、话题搜索和讨论线程，用 `answer-me-with-html` 输出单页 HTML 报告。
 
 ## Default Behavior
 
@@ -42,18 +43,18 @@ bash scripts/check-install.sh
 并行拉取 For You + Following 两个时间线：
 
 ```bash
-opencli twitter timeline --type for-you --limit 15 -f md 2>&1
-opencli twitter timeline --type following --limit 15 -f md 2>&1
+opencli twitter timeline --type for-you --limit 30 -f md 2>&1
+opencli twitter timeline --type following --limit 30 -f md 2>&1
 ```
 
 - timeout: **120s**（首次加载常较慢）
 - 失败（Detached/SecurityError）重试一次
-- 输出：For You 详细表格 + Following 详细表格 + 🔑 推荐要点（3-5 条）+ 可深挖链接
+- 输出见「HTML 输出」
 
 **可选 - Trending**: 仅当用户明确要求"热点趋势""trending"时执行：
 
 ```bash
-OPENCLI_DIAGNOSTIC=1 opencli twitter trending --limit 15 -f md 2>&1
+OPENCLI_DIAGNOSTIC=1 opencli twitter trending --limit 30 -f md 2>&1
 ```
 
 必须加 `OPENCLI_DIAGNOSTIC=1`，否则可能 EMPTY_RESULT。
@@ -71,7 +72,6 @@ opencli twitter search "关键词" --limit 20 -f md 2>&1
 - 中文失败（SecurityError）或结果不足时改英文关键词
 - 同一话题至少尝试 2-3 组近义词，确保覆盖
 - 产品/模型类话题可同时用 `tavily_tavily_search` 补官方信息
-- 输出：表格（作者/内容/时间/互动）+ 分类总结（官方发布 / 实测分享 / 社区评价）
 
 ---
 
@@ -85,60 +85,84 @@ opencli twitter thread "tweet-id" -f md 2>&1
 ```
 
 - timeout: 60s
-- 输出：表格（作者/回复/互动）+ 观点分类（好评 / 中立 / 负面 / 提问）
 
 ---
 
 ### Mode 4: 深度话题报告
 **触发**: "详细了解一下" / "分析一下"（产品发布、收购、模型评测等）
 
-组合：Mode 2 搜索 → 对高互动推文 Mode 3 深挖 → `tavily_tavily_search` 补官方/新闻 → 输出多维度报告。
-
-报告结构：
-1. 核心事件概述
-2. 官方/权威来源信息
-3. 社区观点分类汇总（表格）
-4. 关键数据/对比
-5. 结论与趋势判断
+组合：Mode 2 搜索 → 对高互动推文 Mode 3 深挖 → `tavily_tavily_search` 补官方/新闻。
 
 ---
 
-## Output Templates
+## HTML 输出（统一走 answer-me-with-html）
 
-### 时间线通用（默认详细版）
-```markdown
-## 📱 [For You / 关注列表 / "关键词"] 
+**不要手写 HTML / CSS / SVG。** 只写 Markdown 草稿，交给 `am render` 生成页面。
 
-| 作者 | 内容详解 | 热度 |
-|------|----------|------|
-| @author | **一两句话总结：** 用 1-2 句概括这条推文最重要的信息。<br><br>**详细内容概括：** 展开说明推文在说什么、背景是什么、作者观点或关键细节是什么；把重点内容用 **加粗** 标出来。 | 🔥 N👍 / N浏览 |
+CLI 路径：
 
-### 🔑 核心要点
-1. ...
-
-### 🔎 可继续深挖
-- @author: https://x.com/... — 深挖理由
+```bash
+node ~/.agents/skills/answer-me-with-html/scripts/am.mjs
 ```
 
-时间线输出默认要有信息密度：每条 `内容详解` 包含 **一两句话总结** 和 **详细内容概括** 两部分。总结内容和重点内容要用 **加粗** 显示；不要输出“为什么值得看”列；不要把 `内容详解` 压成 10-20 个字的短句。
+一次 heredoc 出页。下面是最小可用骨架，按实际数据替换数值：
 
-搜索场景在表格里加一列"时间"，深度报告在总结里按"官方/权威"、"实测/案例"、"社区评价"三类组织。
+````bash
+node ~/.agents/skills/answer-me-with-html/scripts/am.mjs render - <<'AM_EOF'
+---
+template: sheet
+title: Twitter/X 热点洞察 · 2026-10-21
+subtitle: 一句话概括本轮主线
+cols: 2
+source: opencli twitter timeline
+---
+本轮抓取 N 条原始推文，去重后 M 条，覆盖时间区间。
 
-### 线程
-```markdown
-## 💬 讨论线程分析
-
-| 作者 | 回复内容 | 互动 |
-|------|----------|------|
-| @author | 摘要 | N👍 |
-
-### 观点分布
-| 类型 | 数量 | 代表性观点 |
-|------|------|------------|
-| 好评 | N | |
-| 中立 | N | |
-| 负面 | N | |
+## A 核心结论 {span=2}
+```callout info 一句话结论标题
+支撑结论的第一个数字。第二个数字。第三个数字。
 ```
+
+## B 话题簇互动量
+```chart bar horizontal unit=次
+新闻速览 | 29142
+Codex 计费 | 21175
+```
+互动量为点赞、转发、回复之和。
+
+## C 两条相反的主线
+| 主线 | 代表推文 | 点赞 | 主张 |
+|---|---|---|---|
+| 替代焦虑 | @author 说了什么 | 1103 | 关键细节 |
+| 规则与评审 | @author 说了什么 | 6630 | 关键细节 |
+
+## D 值得手动读完的几条
+- @author 一句话理由，附互动量
+AM_EOF
+````
+
+### 面板配方
+
+按模式选 3-7 个面板，一个面板只回答一个问题：
+
+| 模式 | 面板 |
+|------|------|
+| Mode 1 | 核心结论 `callout` → 话题簇互动量 `chart bar` → 相反主线对比 `table` → 值得深挖 `list` |
+| Mode 2 | 结论 `callout` → 分类表（官方 / 实测 / 社区评价）`table` → 代表推文 `list` |
+| Mode 3 | 观点分布 `chart pie`（好评/中立/负面/提问）→ 代表回复 `table` |
+| Mode 4 | 事件概述 `callout` → 官方信息 `kv` → 社区观点分类 `table` → 关键数据 `chart` |
+
+### 硬规则
+
+- **只用真实数据**：数字必须来自 `opencli` 输出，不要编造浏览量和点赞。
+- **图表必须有真实数值**：没有数字就用 `table` 或 `list`，不要画 `chart`。
+- **STE 警告必须修**：`am render` 报 `STE n warnings` 时页面不会自动打开；按提示改写后加 `--replace <上一个页面路径>` 重渲染。
+- **改单页只改面板**：已存在的页面用 `am patch page.html --panel "面板标题"`，不要整页重写。
+
+### 交付
+
+1. 渲染成功后调用 `present`，传绝对路径，让用户从卡片打开。
+2. 终端回复 2-3 行：一句核心结论 + 页面链接。不要把草稿或 HTML 贴回终端。
 
 ---
 
@@ -149,7 +173,8 @@ opencli twitter thread "tweet-id" -f md 2>&1
 
 1. `opencli doctor` 检查
 2. 并行：`twitter timeline --type for-you` + `twitter timeline --type following`
-3. 输出 For You 详细表格 + Following 详细表格 + 要点总结 + 可深挖链接
+3. 按 Mode 1 面板配方渲染页面
+4. 回复：本轮的绝对主角是谁 + 页面链接
 
 > Trending 仅在用户明确说"看看热门趋势"时才拉。
 
@@ -160,14 +185,14 @@ opencli twitter thread "tweet-id" -f md 2>&1
 2. 识别官方推文和高互动推文
 3. 对高互动推文执行 `twitter thread "<tweet-id>"`
 4. `tavily_tavily_search` 补官方博客
-5. 输出：官方能力 + 社区实测 + 评价 + 关键数据
+5. 按 Mode 2 面板配方出页
 
 ### Example 3: 教程/攻略查找
 **User**: "去 Twitter 上查一查怎么注册日本 Apple ID"
 
 1. `twitter search "日本 Apple ID 注册"`
 2. 结果不足时换 `"apple id 日本区"`、`"Japan Apple ID register"`
-3. 输出：注册步骤表 + 支付方式 + 避坑指南
+3. 用 `flow` 画步骤，用 `callout` 标避坑点
 
 ---
 
@@ -192,6 +217,7 @@ opencli twitter thread "tweet-id" -f md 2>&1
 | `EMPTY_RESULT` (trending) | 页面结构变化或地区问题 | 加 `OPENCLI_DIAGNOSTIC=1` |
 | 超时 (timeline) | X.com 加载慢 | timeout 调至 120s |
 | Extension not connected | 浏览器扩展未启动 | 打开扩展面板启动 opencli |
+| `am render` 未自动打开 | 有 STE 或代码警告 | 按提示改写后 `--replace` 重跑 |
 | 结果重复/质量差 | 搜索词太宽泛 | 加限定词（"2025"/"最新"/"评测"） |
 
 ---
@@ -206,3 +232,5 @@ opencli twitter thread "tweet-id" -f md 2>&1
 | `opencli twitter search "query"` | 话题搜索 | `--limit`, `-f md`, timeout=120s |
 | `opencli twitter thread "id"` | 讨论线程 | `-f md`, timeout=60s |
 | `opencli doctor` | 检查连接状态 | — |
+| `am render - <<'AM_EOF'` | 出单页 HTML | `--replace <page>` 覆盖上一版 |
+| `am patch page.html --panel "标题"` | 只改一个面板 | 保持原主题与样式 |

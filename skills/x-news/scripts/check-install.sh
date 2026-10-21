@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Check & install opencli + verify Browser Bridge for twitter-insight-browse skill.
+# Check & install opencli + verify Browser Bridge for x-news skill.
 # Usage: bash scripts/check-install.sh
 # Exit codes:
 #   0  all checks passed
