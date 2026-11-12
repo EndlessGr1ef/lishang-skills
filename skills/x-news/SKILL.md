@@ -39,6 +39,7 @@ bash scripts/check-install.sh
 
 ### Mode 1: 快速热点扫描
 **触发**: 默认模式；"最新推文" / "有啥热点" / "For You 推荐" / "拉最新" / "看看 X"
+**产出**: 核心结论 + 话题簇图表 + 8-10 张推文图文卡片（每张含原文、配图、互动量、原推链接、评论区风向）
 
 并行拉取 For You + Following 两个时间线：
 
@@ -58,6 +59,64 @@ OPENCLI_DIAGNOSTIC=1 opencli twitter trending --limit 30 -f md 2>&1
 ```
 
 必须加 `OPENCLI_DIAGNOSTIC=1`，否则可能 EMPTY_RESULT。
+
+### 图文卡片规格（Mode 1 默认产出）
+
+每条热点推文一张独立卡片，卡片顺序按话题簇互动量降序。卡片固定四段：
+
+```markdown
+## C @author：一句话标题 {meta="X 互动 · Y 万浏览"}
+**作者名**（身份）· 北京时间 MM-DD HH:MM · [原推](https://x.com/.../status/...)
+
+> 原文关键句（英文原样保留，中文译文另起一行）
+
+中文摘要：发生了什么 + 1-2 个硬数字。
+
+![与画面一致的图注](/abs/path/media.jpg)
+
+**评论区风向**（N 条样本，最高 ♥M）
+- 主流：主力阵营 + 占比估计
+- 代表：@user（♥N）「逐字引用」
+- 异见：最有力的反方 1 条；没有则写「无明显反方」
+- 信号强度：样本小或点赞低时，明确写「弱信号，按立场计数而非热度排序」
+```
+
+硬规则：
+- 互动量 = 点赞 + 转发 + 回复，写在 meta 里，数字必须来自 opencli 输出。
+- 一条推文一个卡片，不要把两条塞进同一个面板。
+- 选卡标准：每个话题簇取互动量最高的 1-2 条，总数控制在 8-10 张。
+- 第一条卡片之外，总览只保留两个面板：核心结论 `callout` + 话题簇 `chart bar horizontal`。
+
+### 抓评论区（每张卡片必做）
+
+```bash
+opencli twitter thread <tweet-id> --limit 40 --top-by-engagement 15 -f json 2>&1 \
+  | node scripts/extract-replies.mjs
+```
+
+- 必须用 `--top-by-engagement` 取高互动回复，不要用结构序。
+- 一条推一般只能取到 14 条左右回复，第三方点赞常低至 ♥0–♥2。**卡片里必须标注样本量和弱信号**，不要用「共识」「一边倒」这类词。
+- 过滤纯表情、引流、spam、机器人刷屏，只归纳真实观点。
+- 引用必须逐字，带 @handle 和点赞数；没抓到的不要编。
+- 大账号（Elon 级别）评论区常是附和加催更，信息价值低于中小账号的争论帖，如实写出来。
+- 9 条以上要抓时，可拆给 2 个子代理并行，但**单批不超过 3 条**：opencli 共享同一个 Browser Bridge，并发过高会 Detached。
+
+### 配图处理
+
+- 远程图片在页面里不加载。必须先下载到本地，再用 `![图注](/abs/path)` 引用。
+- `pbs.twimg.com` 直连经常只成功一部分，加 UA 头并重试：
+
+```bash
+curl -sfL --retry 2 -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)" \
+  -o /tmp/x-news-media/out.jpg "https://pbs.twimg.com/media/XXXX.jpg"
+```
+
+- **图注必须与画面一致**：先真正看一遍图再写，不要用「推文附图」这类占位描述。常见坑：政治人物肖像、游戏实机截图、聊天记录截图，写错就是事实错误。
+- 模型没有视觉能力时，图注只写能从推文上下文确证的信息，并在卡片里说明「未核验」。
+
+### 增量更新
+
+首轮用 `am render` 一次出整页；之后补评论只在已有页面上逐面板 `am patch`，不要整页重写，否则主题、图片内联和 STE 基线都会丢。
 
 ---
 
@@ -147,7 +206,7 @@ AM_EOF
 
 | 模式 | 面板 |
 |------|------|
-| Mode 1 | 核心结论 `callout` → 话题簇互动量 `chart bar` → 相反主线对比 `table` → 值得深挖 `list` |
+| Mode 1 | 核心结论 `callout` → 话题簇互动量 `chart bar` → 8-10 张推文图文卡片（原文 + 配图 + 互动量 + 原推链接 + 评论区风向） |
 | Mode 2 | 结论 `callout` → 分类表（官方 / 实测 / 社区评价）`table` → 代表推文 `list` |
 | Mode 3 | 观点分布 `chart pie`（好评/中立/负面/提问）→ 代表回复 `table` |
 | Mode 4 | 事件概述 `callout` → 官方信息 `kv` → 社区观点分类 `table` → 关键数据 `chart` |
